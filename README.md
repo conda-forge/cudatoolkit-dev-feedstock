@@ -17,7 +17,7 @@ cloud-based platforms and HPC supercomputers. The toolkit includes
 GPU-accelerated libraries, debugging and optimization tools,
 a C/C++ compiler and a runtime library to deploy your application.
 This package consists of a post-install script that downloads and
-installs the full cuda toolkit.
+installs the full cuda toolkit(compiler, libraries, with the exception of cuda drivers).
 
 
 Current build status
