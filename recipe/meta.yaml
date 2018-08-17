@@ -17,10 +17,10 @@ build:
 
 requirements:
   host:
-   - python >=3
+   - python >=3.5,<3.8.0a0
 
   run:
-   - python >=3
+   - python >=3.5,<3.8.0a0
    - 7za  # [win]
    - conda >=4.5.8
 
@@ -46,7 +46,7 @@ about:
     GPU-accelerated libraries, debugging and optimization tools, 
     a C/C++ compiler and a runtime library to deploy your application.
     This package consists of a post-install script that downloads and 
-    installs the full cuda toolkit.
+    installs the full cuda toolkit(compiler, libraries, with the exception of cuda drivers).
   doc_url: https://developer.nvidia.com/cuda-toolkit
   dev_url: https://developer.nvidia.com/cuda-toolkit
 
