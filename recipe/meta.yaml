@@ -17,10 +17,9 @@ build:
 
 requirements:
   host:
-   - python >=3.5,<3.8.0a0
-
+   - python
   run:
-   - python >=3.5,<3.8.0a0
+   - python
    - 7za  # [win]
    - conda >=4.5.8
 
@@ -55,3 +54,5 @@ extra:
     - andersy005
     - scopatz
     - xmnlab
+
+
