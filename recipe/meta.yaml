@@ -12,7 +12,7 @@ source:
 
 build:
   script: python build.py {{ version }} {{ version_build }} {{ driver_version }}
-  number: 0
+  number: 1
   skip: True  # [win]
 
 requirements:
