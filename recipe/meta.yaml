@@ -48,7 +48,7 @@ about:
     installs the full cuda toolkit(compiler, libraries, with the exception of cuda drivers).
   doc_url: https://developer.nvidia.com/cuda-toolkit
   dev_url: https://developer.nvidia.com/cuda-toolkit
-  
+
 extra:
   recipe-maintainers:
     - andersy005
