@@ -13,15 +13,15 @@ source:
 build:
   script: python build.py {{ version }} {{ version_build }} {{ driver_version }}
   number: 2
-  skip: True  # [win]
+  skip: True  # [win or py2k]
 
 requirements:
   build:
-    - python >=3.6,<3.8.0a0
+    - python
   host:
-    - python >=3.6,<3.8.0a0
+    - python
   run:
-    - python >=3.6,<3.8.0a0
+    - python
     - 7za  # [win]
     - conda >=4.5.8
 
