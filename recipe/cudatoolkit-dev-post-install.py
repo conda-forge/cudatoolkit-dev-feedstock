@@ -337,12 +337,12 @@ def set_config():
     cudatoolkit["driver_version"] = extra_args["driver_version"]
     cudatoolkit[
         "base_url"
-    ] = f'https://developer.nvidia.com/compute/cuda/{cudatoolkit["version"]}/Prod2/'
+    ] = f'https://developer.nvidia.com/compute/cuda/{cudatoolkit["version"]}/Prod/'
     cudatoolkit["installers_url_ext"] = f"local_installers/"
     cudatoolkit["patch_url_ext"] = f""
     cudatoolkit[
         "md5_url"
-    ] = f'http://developer.download.nvidia.com/compute/cuda/{cudatoolkit["version"]}/Prod2/docs/sidebar/md5sum.txt'
+    ] = f'http://developer.download.nvidia.com/compute/cuda/{cudatoolkit["version"]}/Prod/docs/sidebar/md5sum.txt'
 
     cudatoolkit["linux"] = {
         "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux'
