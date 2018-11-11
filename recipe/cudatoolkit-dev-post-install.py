@@ -163,28 +163,6 @@ class Extractor(object):
         raise RuntimeError("Must implement")
 
 
-class WindowsExtractor(Extractor):
-    """The windows extractor
-    """
-
-    def extract(self):
-        print("Extracting on Windows.....")
-        runfile = os.path.join(self.src_dir, self.cu_blob)
-        cmd = ["7za", "x", "-o%s" % str(self.src_dir), runfile]
-        try:
-            subprocess.check_call(cmd)
-        except subprocess.CalledProcessError as e:
-            print(
-                "ERROR: Couldn't install Cudatoolkit: \
-                   {reason}".format(
-                    reason=e
-                )
-            )
-
-    def cleanup(self):
-        pass
-
-
 class LinuxExtractor(Extractor):
     """The Linux Extractor
     """
@@ -312,8 +290,6 @@ def getplatform():
     plt = sys.platform
     if plt.startswith("linux"):
         return "linux"
-    elif plt.startswith("win"):
-        return "windows"
     elif plt.startswith("darwin"):
         return "osx"
     else:
@@ -323,7 +299,7 @@ def getplatform():
 def set_config():
     """Set necessary configurations"""
 
-    cudatoolkit = {"linux": {}, "windows": {}, "osx": {}}
+    cudatoolkit = {"linux": {}, "osx": {}}
     prefix = Path(os.environ["PREFIX"])
     extra_args = dict()
     with open(prefix / "bin" / "cudatoolkit-dev-extra-args.json", "r") as f:
@@ -348,10 +324,6 @@ def set_config():
         "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux'
     }
 
-    cudatoolkit["windows"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_windows'
-    }
-
     cudatoolkit["osx"] = {
         "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_mac'
     }
@@ -359,7 +331,7 @@ def set_config():
     return cudatoolkit
 
 
-dispatcher = {"linux": LinuxExtractor, "windows": WindowsExtractor, "osx": OsxExtractor}
+dispatcher = {"linux": LinuxExtractor, "osx": OsxExtractor}
 
 
 def _main():
