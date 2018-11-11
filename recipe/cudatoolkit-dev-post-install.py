@@ -163,28 +163,6 @@ class Extractor(object):
         raise RuntimeError("Must implement")
 
 
-class WindowsExtractor(Extractor):
-    """The windows extractor
-    """
-
-    def extract(self):
-        print("Extracting on Windows.....")
-        runfile = os.path.join(self.src_dir, self.cu_blob)
-        cmd = ["7za", "x", "-o%s" % str(self.src_dir), runfile]
-        try:
-            subprocess.check_call(cmd)
-        except subprocess.CalledProcessError as e:
-            print(
-                "ERROR: Couldn't install Cudatoolkit: \
-                   {reason}".format(
-                    reason=e
-                )
-            )
-
-    def cleanup(self):
-        pass
-
-
 class LinuxExtractor(Extractor):
     """The Linux Extractor
     """
