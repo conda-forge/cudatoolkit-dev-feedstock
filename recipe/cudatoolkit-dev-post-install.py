@@ -175,8 +175,8 @@ class LinuxExtractor(Extractor):
             runfile,
             "--silent",
             "--toolkit",
-            "--toolkitpath",
-            str(self.src_dir),
+            "--toolkitpath=" + str(self.src_dir),
+            "--defaultroot=" + str(self.src_dir),
             "--override",
         ]
         try:
@@ -321,7 +321,7 @@ def set_config():
     ] = f'http://developer.download.nvidia.com/compute/cuda/{cudatoolkit["version"]}/Prod/docs/sidebar/md5sum.txt'
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux'
+        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux.run'
     }
 
     cudatoolkit["osx"] = {
