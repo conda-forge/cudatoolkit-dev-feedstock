@@ -18,6 +18,7 @@ build:
 requirements:
   run:
     - conda >=4.5.8
+    - python
 
 test:
   commands:
