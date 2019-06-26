@@ -16,10 +16,12 @@ build:
   skip: True  # [win]
 
 requirements:
-  run:
-    - conda >=4.5.8
-
+  host:
+    - python >=3
+    - conda
 test:
+  requires:
+    - conda
   commands:
     - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
     - test -f $PREFIX/bin/cudatoolkit-dev-extra-args.json  # [unix]
