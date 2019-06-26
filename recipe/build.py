@@ -17,8 +17,8 @@ def set_chmod(file_name):
 def copy_files(src, dst):
     try:
         if os.path.isfile(src):
-            set_chmod(src)
             shutil.copy(src, dst)
+            set_chmod(dst)
     except FileExistsError:
         pass
 
