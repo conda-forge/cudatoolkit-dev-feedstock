@@ -15,10 +15,6 @@ build:
   number: 1
   skip: True  # [win]
 
-requirements:
-  run:
-    - conda >=4.5.8
-
 test:
   commands:
     - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
