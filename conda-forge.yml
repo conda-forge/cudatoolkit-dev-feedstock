@@ -4,3 +4,9 @@ travis:
 appveyor:
   secure:
     BINSTAR_TOKEN: tumuXLL8PU75WMnRDemRy02ruEq2RpNxeK3dz0MjFssnosPm2v4EFjfNB4PTotA1
+
+docker:
+  executable: docker
+  image: "condaforge/linux-anvil"
+  command: "bash"
+  interactive: True
