@@ -35,28 +35,12 @@ from __future__ import print_function
 import json
 import os
 import shutil
-import stat
 import subprocess
 import sys
 import urllib.parse as urlparse
 from pathlib import Path
 
 from conda.exports import download, hashsum_file
-
-
-def set_chmod(file_name):
-    # Do a simple chmod +x for a file within python
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IXOTH)
-
-
-def copy_files(src, dst):
-    try:
-        if os.path.isfile(src):
-            set_chmod(src)
-            shutil.copy(src, dst)
-    except FileExistsError:
-        pass
 
 
 class Extractor(object):
