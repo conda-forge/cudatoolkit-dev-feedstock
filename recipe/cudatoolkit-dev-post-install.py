@@ -79,7 +79,7 @@ class Extractor(object):
         # Copy cudatoolkit-dev-activate and cudatoolkit-dev-deactivate
         # to activate.d and deactivate.d directories
 
-        scripts_dir = Path(self.prefix) / "scripts"
+        scripts_dir = Path(self.conda_prefix) / "scripts"
         activate_scripts_dir = scripts_dir / "activate.d"
         deactivate_scripts_dir = scripts_dir / "deactivate.d"
 
