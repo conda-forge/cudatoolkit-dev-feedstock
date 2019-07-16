@@ -12,14 +12,16 @@ source:
 
 build:
   script: python build.py {{ version }} {{ version_build }} {{ driver_version }}
-  number: 1
+  number: 2
   skip: True  # [win]
 
 requirements:
-  run:
-    - conda >=4.5.8
-
+  host:
+    - python >=3
+    - conda
 test:
+  requires:
+    - conda
   commands:
     - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
     - test -f $PREFIX/bin/cudatoolkit-dev-extra-args.json  # [unix]
