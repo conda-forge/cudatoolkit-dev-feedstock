@@ -42,13 +42,23 @@ import urllib.parse as urlparse
 from pathlib import Path
 
 from urllib.request import urlretrieve
-from hashlib import hashsum_file
+
 
 def set_chmod(file_name):
     # Do a simple chmod +x for a file within python
     st = os.stat(file_name)
     os.chmod(file_name, st.st_mode | stat.S_IXOTH)
 
+def hashsum_file(path, mode='md5'):  # pragma: no cover
+    import hashlib
+    h = hashlib.new(mode)
+    with open(path, 'rb') as fi:
+        while True:
+            chunk = fi.read(262144)  # process chunks of 256KB
+            if not chunk:
+                break
+            h.update(chunk)
+    return h.hexdigest()
 
 def copy_files(src, dst):
     try:
