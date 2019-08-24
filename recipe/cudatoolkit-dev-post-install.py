@@ -41,8 +41,8 @@ import sys
 import urllib.parse as urlparse
 from pathlib import Path
 
-from conda.exports import download, hashsum_file
-
+from urllib.request import urlretrieve
+from hashlib import hashsum_file
 
 def set_chmod(file_name):
     # Do a simple chmod +x for a file within python
@@ -124,7 +124,7 @@ class Extractor(object):
         dl_path = os.path.join(self.src_dir, self.cu_blob)
         if not self.debug_install_path:
             print("downloading %s to %s" % (dl_url, dl_path))
-            download(dl_url, dl_path)
+            urlretrieve(dl_url, dl_path)
 
         else:
             existing_file = os.path.join(self.debug_install_path, self.cu_blob)
