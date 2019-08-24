@@ -146,7 +146,7 @@ class Extractor(object):
         """
         md5file = self.md5_url.split("/")[-1]
         path = os.path.join(self.src_dir, md5file)
-        download(self.md5_url, path)
+        urlretrieve(self.md5_url, path)
 
         # compute hash of blob
         blob_path = os.path.join(self.src_dir, self.cu_blob)
