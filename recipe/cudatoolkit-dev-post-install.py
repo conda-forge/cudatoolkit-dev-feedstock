@@ -318,7 +318,7 @@ def set_config():
     cudatoolkit["version_build"] = extra_args["version_build"]
     cudatoolkit["driver_version"] = extra_args["driver_version"]
 
-    url_dev = os.environ.get("PROXY_DEV_NVIDIA", "https://developer.nvidia.com/")
+    url_dev = os.environ.get("PROXY_DEV_NVIDIA", "https://developer.download.nvidia.com/")
     url_dev_download = os.environ.get(
         "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
     )
@@ -332,11 +332,11 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux'
+        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux.run'
     }
 
     cudatoolkit["osx"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_mac'
+        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_mac.dmg'
     }
 
     return cudatoolkit
