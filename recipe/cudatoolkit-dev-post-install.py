@@ -150,7 +150,7 @@ class OsxExtractor(Extractor):
     def _mount_extract(self, image, store):
         """Mounts and extracts the files from an image into store
         """
-        with tempdir() as mntpnt:
+        with tempdir(dir=str(self.blob_dir)) as mntpnt:
             subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
             for tlpath, tldirs, tlfiles in os.walk(mntpnt):
                 for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
