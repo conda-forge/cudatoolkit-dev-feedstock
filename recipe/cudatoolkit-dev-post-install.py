@@ -37,6 +37,7 @@ import subprocess
 import sys
 import fnmatch
 import urllib.parse as urlparse
+import tarfile
 from pathlib import Path
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory as tempdir
@@ -132,7 +133,7 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [runfile, "--silent", f"--extract={tmpdir}", "--override"]
+            cmd = [runfile, f"--extract={tmpdir}"]
             try:
                 subprocess.check_call(cmd, env=dict(DISPLAY=""))
                 toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
@@ -149,12 +150,13 @@ class OsxExtractor(Extractor):
     def _mount_extract(self, image, store):
         """Mounts and extracts the files from an image into store
         """
-        with tempdir() as tmpmnt:
-            with _hdiutil_mount(tmpmnt, image) as mntpnt:
-                for tlpath, tldirs, tlfiles in os.walk(mntpnt):
-                    for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
-                        with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
-                            tar.extractall(store)
+        with tempdir() as mntpnt:
+            subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
+            for tlpath, tldirs, tlfiles in os.walk(mntpnt):
+                for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
+                    with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
+                        tar.extractall(store)
+            subprocess.check_call(["hdiutil", "detach", mntpnt])
 
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
