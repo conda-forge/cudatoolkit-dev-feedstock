@@ -35,6 +35,7 @@ import os
 import shutil
 import subprocess
 import sys
+import fnmatch
 import urllib.parse as urlparse
 from pathlib import Path
 from contextlib import contextmanager
@@ -117,7 +118,7 @@ class Extractor(object):
 
     def copy_files(self, source, destination):
         shutil.copytree(
-            source, destination, symlinks=True, ignore_dangling_symlinks=True,
+            source, destination, symlinks=True, ignore_dangling_symlinks=True
         )
 
 
@@ -139,6 +140,7 @@ class LinuxExtractor(Extractor):
             except Exception as exc:
                 raise exc
         os.remove(runfile)
+
 
 class OsxExtractor(Extractor):
     """The osx Extractor
@@ -220,9 +222,7 @@ def set_config():
         "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
     }
 
-    cudatoolkit["osx"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'
-    }
+    cudatoolkit["osx"] = {"blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'}
 
     return cudatoolkit
 
