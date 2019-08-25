@@ -43,13 +43,15 @@ from pathlib import Path
 
 
 def download(url, target_full_path):
-    cmd = ['wget', url, '-O', target_full_path]
+    cmd = ["wget", url, "-O", target_full_path]
     subprocess.check_call(cmd)
 
-def hashsum_file(path, mode='md5'):  # pragma: no cover
+
+def hashsum_file(path, mode="md5"):  # pragma: no cover
     import hashlib
+
     h = hashlib.new(mode)
-    with open(path, 'rb') as fi:
+    with open(path, "rb") as fi:
         while True:
             chunk = fi.read(262144)  # process chunks of 256KB
             if not chunk:
@@ -57,8 +59,8 @@ def hashsum_file(path, mode='md5'):  # pragma: no cover
             h.update(chunk)
     return h.hexdigest()
 
-def copy_files(src, dst):
 
+def copy_files(src, dst):
     def set_chmod(file_name):
         # Do a simple chmod +x for a file within python
         st = os.stat(file_name)
@@ -112,16 +114,12 @@ class Extractor(object):
         activate_scripts_dir = scripts_dir / "activate.d"
         deactivate_scripts_dir = scripts_dir / "deactivate.d"
 
-        activate_scripts_list = [
-            "cudatoolkit-dev-activate.sh",
-        ]
+        activate_scripts_list = ["cudatoolkit-dev-activate.sh"]
         for file_name in activate_scripts_list:
             file_full_path = activate_scripts_dir / file_name
             shutil.copy(file_full_path, activate_dir_path)
 
-        deactivate_scripts_list = [
-            "cudatoolkit-dev-deactivate.sh",
-        ]
+        deactivate_scripts_list = ["cudatoolkit-dev-deactivate.sh"]
 
         for file_name in deactivate_scripts_list:
             file_full_path = deactivate_scripts_dir / file_name
@@ -263,7 +261,7 @@ class OsxExtractor(Extractor):
                 pass
 
     def extract(self):
-        runfile = str(self.src_dir /  self.cu_blob)
+        runfile = str(self.src_dir / self.cu_blob)
         extract_store_name = "tmpstore"
         extract_temp_dir_name = "tmp"
         self.extract_store = str(self.src_dir / extract_store_name)
@@ -321,12 +319,14 @@ def set_config():
     cudatoolkit["driver_version"] = extra_args["driver_version"]
 
     url_dev = os.environ.get("PROXY_DEV_NVIDIA", "https://developer.nvidia.com/")
-    url_dev_download = os.environ.get("PROXY_DEV_DOWNLOAD_NVIDIA",
-                                      "http://developer.download.nvidia.com/")
+    url_dev_download = os.environ.get(
+        "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
+    )
     url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/Prod/'
     cudatoolkit["base_url"] = urlparse.urljoin(url_dev, url_prod_ext)
-    cudatoolkit["md5_url"] = urlparse.urljoin(url_dev_download,
-                                              url_prod_ext + 'docs/sidebar/md5sum.txt')
+    cudatoolkit["md5_url"] = urlparse.urljoin(
+        url_dev_download, url_prod_ext + "docs/sidebar/md5sum.txt"
+    )
 
     cudatoolkit["installers_url_ext"] = f"local_installers/"
     cudatoolkit["patch_url_ext"] = f""

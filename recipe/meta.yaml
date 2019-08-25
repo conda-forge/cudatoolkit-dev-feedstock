@@ -1,7 +1,7 @@
 {% set name = "cudatoolkit-dev" %}
-{% set version = "10.0" %}
-{% set version_build = "130" %}
-{% set driver_version = "410.48" %}
+{% set version = "10.1" %}
+{% set version_build = "243" %}
+{% set driver_version = "418.87.00" %}
 
 package:
   name: {{ name|lower }}
@@ -12,7 +12,7 @@ source:
 
 build:
   script: python build.py {{ version }} {{ version_build }} {{ driver_version }}
-  number: 3
+  number: 0
   skip: True  # [win]
 
 requirements:
@@ -23,6 +23,7 @@ test:
   requires:
     - python >=3.6
     - wget 
+    - numba 
   commands:
     - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
     - test -f $PREFIX/bin/cudatoolkit-dev-extra-args.json  # [unix]
