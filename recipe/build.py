@@ -41,7 +41,7 @@ def _main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Build script for cudatoolkit-dev")
 
-    parser.add_argument("version", action="store", type=str)
+    parser.add_argument("release", action="store", type=str)
     parser.add_argument("version_build", action="store", type=str)
     parser.add_argument("driver_version", action="store", type=str)
     results = parser.parse_args()

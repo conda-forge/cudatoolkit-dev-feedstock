@@ -53,7 +53,7 @@ class Extractor(object):
           platform_config - the configuration for this platform
         """
         self.cu_name = cudatoolkit_config["name"]
-        self.cu_version = cudatoolkit_config["version"]
+        self.cu_version = cudatoolkit_config["release"]
         self.md5_url = cudatoolkit_config["md5_url"]
         self.base_url = cudatoolkit_config["base_url"]
         self.patch_url_text = cudatoolkit_config["patch_url_ext"]
@@ -62,8 +62,8 @@ class Extractor(object):
         self.conda_prefix = os.environ.get("CONDA_PREFIX")
         self.prefix = os.environ["PREFIX"]
         self.src_dir = Path(self.conda_prefix) / "pkgs" / "cuda-toolkit"
-        self.blob_dir = tempdir()
-        os.makedirs(self.src_dir, exist_ok=True)
+        self.blob_dir = Path(self.conda_prefix) / "pkgs" / self.cu_name
+        os.makedirs(self.blob_dir, exist_ok=True)
 
         self.symlinks = getplatform() == "linux"
 
@@ -94,7 +94,10 @@ class Extractor(object):
 
     def download(self, url, target_full_path):
         cmd = ["wget", url, "-O", target_full_path, "-q"]
-        subprocess.check_call(cmd)
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError as exc:
+            raise exc
 
     def download_blobs(self):
         """Downloads the binary blobs to the $BLOB_DIR
@@ -114,7 +117,7 @@ class Extractor(object):
 
     def copy_files(self, source, destination):
         shutil.copytree(
-            source, destination, symlinks=True, ignore_dangling_symlinks=True
+            source, destination, symlinks=True, ignore_dangling_symlinks=True,
         )
 
 
@@ -133,9 +136,9 @@ class LinuxExtractor(Extractor):
                 subprocess.check_call(cmd, env=dict(DISPLAY=""))
                 toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
                 self.copy_files(toolkitpath, self.src_dir)
-            except Exception as e:
-                raise (f"ERROR: Couldn't install Cudatoolkit: {e}")
-
+            except Exception as exc:
+                raise exc
+        os.remove(runfile)
 
 class OsxExtractor(Extractor):
     """The osx Extractor
@@ -162,6 +165,7 @@ class OsxExtractor(Extractor):
                 / "CUDA-{}".format(self.cu_version)
             )
             self.copy_files(toolkitpath, self.src_dir)
+        os.remove(runfile)
 
 
 @contextmanager
@@ -195,6 +199,7 @@ def set_config():
     cudatoolkit["buildnum"] = os.environ["PKG_BUILDNUM"]
     cudatoolkit["version_build"] = extra_args["version_build"]
     cudatoolkit["driver_version"] = extra_args["driver_version"]
+    cudatoolkit["release"] = extra_args["release"]
 
     url_dev = os.environ.get(
         "PROXY_DEV_NVIDIA", "https://developer.download.nvidia.com/"
@@ -202,7 +207,7 @@ def set_config():
     url_dev_download = os.environ.get(
         "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
     )
-    url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/Prod/'
+    url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
     cudatoolkit["base_url"] = urlparse.urljoin(url_dev, url_prod_ext)
     cudatoolkit["md5_url"] = urlparse.urljoin(
         url_dev_download, url_prod_ext + "docs/sidebar/md5sum.txt"
@@ -212,11 +217,11 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux.run'
+        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
     }
 
     cudatoolkit["osx"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_mac.dmg'
+        "blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'
     }
 
     return cudatoolkit
