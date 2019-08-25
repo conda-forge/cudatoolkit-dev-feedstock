@@ -2,48 +2,60 @@
 set -o pipefail
 
 create_symlink_linux() { 
-
+         
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/bin/*;
         do 
+            shopt -u nullglob
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/bin/${link};
         done
+        shopt -u nullglob
 
-
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/lib64/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
-
+        shopt -u nullglob
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/bin/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/bin/${link};
 
         done
-
+        shopt -u nullglob
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/lib64/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
-
+        shopt -u nullglob
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/libdevice/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
-
+        shopt -u nullglob
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/include/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/include/${link};
 
         done
+        shopt -u nullglob
 
 
         ln -sf $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm $CONDA_PREFIX/
@@ -53,48 +65,61 @@ create_symlink_linux() {
 
 
 create_symlink_osx() { 
-
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/bin/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/bin/${link};
         done
+        shopt -u nullglob
 
-
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/lib/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
+        shopt -u nullglob
 
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/bin/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/bin/${link};
 
         done
+        shopt -u nullglob
 
+
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/lib/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
+        shopt -u nullglob
 
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/libdevice/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/lib/${link};
 
         done
-
+        shopt -u nullglob
+        
+        shopt -s nullglob
         for f in $CONDA_PREFIX/pkgs/cuda-toolkit/include/*;
         do 
             link=$(basename "$f");
             ln -sf $f $CONDA_PREFIX/include/${link};
 
         done
+        shopt -u nullglob
 
 
         ln -sf $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm $CONDA_PREFIX/
