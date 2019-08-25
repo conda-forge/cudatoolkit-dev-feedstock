@@ -8,13 +8,12 @@ import stat
 from pathlib import Path
 
 
-def set_chmod(file_name):
-    # Do a simple chmod +x for a file within python
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IXOTH)
-
-
 def copy_files(src, dst):
+
+    def set_chmod(file_name):
+        # Do a simple chmod +x for a file within python
+        st = os.stat(file_name)
+        os.chmod(file_name, st.st_mode | stat.S_IXOTH)
     try:
         if os.path.isfile(src):
             shutil.copy(src, dst)

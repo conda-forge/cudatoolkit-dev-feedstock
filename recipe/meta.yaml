@@ -17,8 +17,12 @@ build:
 
 requirements:
   host:
-    - python >=3
+    - python >=3.6
+    - wget
 test:
+  requires:
+    - python >=3.6
+    - wget 
   commands:
     - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
     - test -f $PREFIX/bin/cudatoolkit-dev-extra-args.json  # [unix]

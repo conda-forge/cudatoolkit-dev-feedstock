@@ -41,13 +41,10 @@ import sys
 import urllib.parse as urlparse
 from pathlib import Path
 
-from urllib.request import urlretrieve
 
-
-def set_chmod(file_name):
-    # Do a simple chmod +x for a file within python
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IXOTH)
+def download(url, target_full_path):
+    cmd = ['wget', url, '-O', target_full_path]
+    subprocess.check_call(cmd)
 
 def hashsum_file(path, mode='md5'):  # pragma: no cover
     import hashlib
@@ -61,6 +58,12 @@ def hashsum_file(path, mode='md5'):  # pragma: no cover
     return h.hexdigest()
 
 def copy_files(src, dst):
+
+    def set_chmod(file_name):
+        # Do a simple chmod +x for a file within python
+        st = os.stat(file_name)
+        os.chmod(file_name, st.st_mode | stat.S_IXOTH)
+
     try:
         if os.path.isfile(src):
             set_chmod(src)
@@ -111,7 +114,6 @@ class Extractor(object):
 
         activate_scripts_list = [
             "cudatoolkit-dev-activate.sh",
-            "cudatoolkit-dev-activate.bat",
         ]
         for file_name in activate_scripts_list:
             file_full_path = activate_scripts_dir / file_name
@@ -119,7 +121,6 @@ class Extractor(object):
 
         deactivate_scripts_list = [
             "cudatoolkit-dev-deactivate.sh",
-            "cudatoolkit-dev-deactivate.bat",
         ]
 
         for file_name in deactivate_scripts_list:
@@ -134,31 +135,31 @@ class Extractor(object):
         dl_path = os.path.join(self.src_dir, self.cu_blob)
         if not self.debug_install_path:
             print("downloading %s to %s" % (dl_url, dl_path))
-            urlretrieve(dl_url, dl_path)
+            download(dl_url, dl_path)
 
         else:
             existing_file = os.path.join(self.debug_install_path, self.cu_blob)
             print("DEBUG: copying %s to %s" % (existing_file, dl_path))
             shutil.copy(existing_file, dl_path)
 
-    def check_md5(self):
-        """Checks the md5sums of the downloaded binaries
-        """
-        md5file = self.md5_url.split("/")[-1]
-        path = os.path.join(self.src_dir, md5file)
-        urlretrieve(self.md5_url, path)
+    # def check_md5(self):
+    #     """Checks the md5sums of the downloaded binaries
+    #     """
+    #     md5file = self.md5_url.split("/")[-1]
+    #     path = os.path.join(self.src_dir, md5file)
+    #     download(self.md5_url, path)
 
-        # compute hash of blob
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        md5sum = hashsum_file(blob_path, "md5")
+    #     # compute hash of blob
+    #     blob_path = os.path.join(self.src_dir, self.cu_blob)
+    #     md5sum = hashsum_file(blob_path, "md5")
 
-        # get checksums
-        with open(path, "r") as f:
-            checksums = [x.strip().split() for x in f.read().splitlines() if x]
+    #     # get checksums
+    #     with open(path, "r") as f:
+    #         checksums = [x.strip().split() for x in f.read().splitlines() if x]
 
-        # check md5 and filename match up
-        check_dict = {x[0]: x[1] for x in checksums}
-        assert check_dict[md5sum].startswith(self.cu_blob[:-7])
+    #     # check md5 and filename match up
+    #     check_dict = {x[0]: x[1] for x in checksums}
+    #     assert check_dict[md5sum].startswith(self.cu_blob[:-7])
 
     def extract(self, *args):
         """The method to extract files from the cuda binary blobs.
@@ -179,7 +180,7 @@ class LinuxExtractor(Extractor):
 
     def extract(self):
         print("Extracting on Linux")
-        runfile = os.path.join(self.src_dir, self.cu_blob)
+        runfile = self.src_dir / self.cu_blob
         os.chmod(runfile, 0o777)
         cmd = [
             runfile,
@@ -190,19 +191,16 @@ class LinuxExtractor(Extractor):
             "--override",
         ]
         try:
-            subprocess.check_call(cmd)
-        except subprocess.CalledProcessError as e:
-            print(
-                "ERROR: Couldn't install Cudatoolkit: \
-                   {reason}".format(
-                    reason=e
-                )
-            )
+            process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+            process.wait()
+        except Exception as e:
+            print("ERROR: Couldn't install Cudatoolkit:")
+            raise e
 
     def cleanup(self):
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        if os.path.exists(blob_path):
-            os.remove(blob_path)
+        blob_path = self.src_dir / self.cu_blob
+        if blob_path.exists():
+            blob_path.unlink()
 
         else:
             pass
@@ -265,20 +263,20 @@ class OsxExtractor(Extractor):
                 pass
 
     def extract(self):
-        runfile = os.path.join(self.src_dir, self.cu_blob)
+        runfile = str(self.src_dir /  self.cu_blob)
         extract_store_name = "tmpstore"
         extract_temp_dir_name = "tmp"
-        self.extract_store = os.path.join(self.src_dir, extract_store_name)
-        self.extract_temp_dir = os.path.join(self.src_dir, extract_temp_dir_name)
+        self.extract_store = str(self.src_dir / extract_store_name)
+        self.extract_temp_dir = str(self.src_dir / extract_temp_dir_name)
         os.makedirs(self.extract_store, exist_ok=True)
         os.makedirs(self.extract_temp_dir, exist_ok=True)
         self._hdiutil_mount(self.extract_store, runfile, self.extract_temp_dir)
         self.copy_files()
 
     def cleanup(self):
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        if os.path.exists(blob_path):
-            os.remove(blob_path)
+        blob_path = self.src_dir / self.cu_blob
+        if blob_path.exists():
+            blob_path.unlink()
 
         else:
             pass
@@ -365,7 +363,7 @@ def _main():
     extractor.download_blobs()
 
     # check md5sum
-    extractor.check_md5()
+    # extractor.check_md5()
 
     # Extract
     extractor.extract()
