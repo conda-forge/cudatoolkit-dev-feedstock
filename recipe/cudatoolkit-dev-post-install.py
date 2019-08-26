@@ -155,8 +155,16 @@ class OsxExtractor(Extractor):
         subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
         for tlpath, tldirs, tlfiles in os.walk(mntpnt):
             for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
-                with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
-                    tar.extractall(store, numeric_owner=True)
+                with tarfile.open(os.path.join(tlpath, tzfile), 'r:gz') as tar:
+                    for file_ in tar:
+                        try:
+                            tar.extract(file_)
+                        except Exception as e:
+                            os.remove(file_)
+                            tar.extract(file_)
+                        finally:
+                            os.chmod(file_.name, file_.mode)
+                    # tar.extractall(store, numeric_owner=True)
         subprocess.check_call(["hdiutil", "detach", mntpnt])
 
         try:
