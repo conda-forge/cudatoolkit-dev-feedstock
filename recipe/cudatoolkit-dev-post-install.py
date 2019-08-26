@@ -133,7 +133,7 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [runfile, f"--extract={tmpdir}"]
+            cmd = [runfile, f"--extract={tmpdir}", f"--defaultroot={tmpdir}"]
             try:
                 subprocess.check_call(cmd, env=dict(DISPLAY=""))
                 toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
@@ -156,7 +156,7 @@ class OsxExtractor(Extractor):
         for tlpath, tldirs, tlfiles in os.walk(mntpnt):
             for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
                 with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
-                    tar.extractall(store)
+                    tar.extractall(store, numeric_owner=True)
         subprocess.check_call(["hdiutil", "detach", mntpnt])
 
         try:
