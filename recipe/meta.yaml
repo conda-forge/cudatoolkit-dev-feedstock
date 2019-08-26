@@ -19,12 +19,12 @@ requirements:
   host:
     - python >=3.6
     - wget
+
 test:
   requires:
-    - python >=3.6
-    - wget 
-    - numba 
-  
+    - numba
+    - wget
+
 
 about:
   home: "https://developer.nvidia.com"

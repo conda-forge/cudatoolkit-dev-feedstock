@@ -150,13 +150,19 @@ class OsxExtractor(Extractor):
     def _mount_extract(self, image, store):
         """Mounts and extracts the files from an image into store
         """
-        with tempdir(dir=str(self.blob_dir)) as mntpnt:
-            subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
-            for tlpath, tldirs, tlfiles in os.walk(mntpnt):
-                for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
-                    with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
-                        tar.extractall(store)
-            subprocess.check_call(["hdiutil", "detach", mntpnt])
+        mntpnt = str(self.blob_dir / "tmpstore")
+        os.makedirs(mntpnt, exist_ok=True)
+        subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
+        for tlpath, tldirs, tlfiles in os.walk(mntpnt):
+            for tzfile in fnmatch.filter(tlfiles, "*.tar.gz"):
+                with tarfile.open(os.path.join(tlpath, tzfile)) as tar:
+                    tar.extractall(store)
+        subprocess.check_call(["hdiutil", "detach", mntpnt])
+
+        try:
+            shutil.rmtree(mntpnt, ignore_errors=True)
+        except Exception as exc:
+            raise exc 
 
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
