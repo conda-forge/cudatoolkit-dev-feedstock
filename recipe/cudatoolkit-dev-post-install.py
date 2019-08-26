@@ -151,20 +151,23 @@ class OsxExtractor(Extractor):
         mntpnt = str(self.blob_dir / "tmpstore")
         os.makedirs(mntpnt, exist_ok=True)
         subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
-        cmd = [
-            "find",
-            mntpnt,
-            "-name",
-            '"*.tar.gz"',
-            "-exec",
-            "tar",
-            "xvf",
-            "'{}'",
-            "--directory",
-            store,
-            "';'",
-        ]
-        subprocess.check_call(cmd)
+        cmd = " ".join(
+            [
+                "find",
+                mntpnt,
+                "-name",
+                '"*.tar.gz"',
+                "-exec",
+                "tar",
+                "xvf",
+                "{}",
+                f"--directory={store}",
+                "';'",
+            ]
+        )
+
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p.wait()
         subprocess.check_call(["hdiutil", "detach", mntpnt])
 
         try:
@@ -175,6 +178,7 @@ class OsxExtractor(Extractor):
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
         store = str(self.blob_dir / "store")
+        os.makedirs(store, exist_ok=True)
         self._mount_extract(runfile, store)
         toolkitpath = (
             Path(store) / "Developer" / "NVIDIA" / "CUDA-{}".format(self.cu_version)
