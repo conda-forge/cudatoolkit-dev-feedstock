@@ -166,16 +166,21 @@ class OsxExtractor(Extractor):
 
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
-        with tempdir() as tmpdir:
-            self._mount_extract(runfile, tmpdir)
-            toolkitpath = (
-                Path(tmpdir)
-                / "Developer"
-                / "NVIDIA"
-                / "CUDA-{}".format(self.cu_version)
-            )
-            self.copy_files(toolkitpath, self.src_dir)
+        store = str(self.blob_dir / "store")
+        self._mount_extract(runfile, store)
+        toolkitpath = (
+            Path(store)
+            / "Developer"
+            / "NVIDIA"
+            / "CUDA-{}".format(self.cu_version)
+        )
+        self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
+
+        try:
+            shutil.rmtree(store, ignore_errors=True)
+        except Exception as exc:
+            raise exc 
 
 
 @contextmanager
