@@ -151,7 +151,19 @@ class OsxExtractor(Extractor):
         mntpnt = str(self.blob_dir / "tmpstore")
         os.makedirs(mntpnt, exist_ok=True)
         subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
-        cmd = ["find", mntpnt, "-name", '"*.tar.gz"', "-exec", "tar", "xvf", "'{}'", "--directory", store, "';'"]
+        cmd = [
+            "find",
+            mntpnt
+            "-name",
+            '"*.tar.gz"',
+            "-exec",
+            "tar",
+            "xvf",
+            "'{}'",
+            "--directory",
+            store,
+            "';'",
+        ]
         subprocess.check_call(cmd)
         subprocess.check_call(["hdiutil", "detach", mntpnt])
 
