@@ -153,7 +153,7 @@ class OsxExtractor(Extractor):
         subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
         cmd = [
             "find",
-            mntpnt
+            mntpnt,
             "-name",
             '"*.tar.gz"',
             "-exec",
@@ -170,17 +170,14 @@ class OsxExtractor(Extractor):
         try:
             shutil.rmtree(mntpnt, ignore_errors=True)
         except Exception as exc:
-            raise exc 
+            raise exc
 
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
         store = str(self.blob_dir / "store")
         self._mount_extract(runfile, store)
         toolkitpath = (
-            Path(store)
-            / "Developer"
-            / "NVIDIA"
-            / "CUDA-{}".format(self.cu_version)
+            Path(store) / "Developer" / "NVIDIA" / "CUDA-{}".format(self.cu_version)
         )
         self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
@@ -188,7 +185,7 @@ class OsxExtractor(Extractor):
         try:
             shutil.rmtree(store, ignore_errors=True)
         except Exception as exc:
-            raise exc 
+            raise exc
 
 
 @contextmanager
