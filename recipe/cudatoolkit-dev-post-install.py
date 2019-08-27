@@ -106,14 +106,17 @@ class Extractor(object):
         dl_url = urlparse.urljoin(dl_url, self.cu_blob)
         dl_path = os.path.join(self.blob_dir, self.cu_blob)
 
-        print("downloading %s to %s" % (dl_url, dl_path))
+        if os.path.isfile(dl_path):
+            print("re-using previously downloaded %s" % (dl_path))
+        else:
+            print("downloading %s to %s" % (dl_url, dl_path))
         self.download(dl_url, dl_path)
 
     def extract(self, *args):
         """The method to extract files from the cuda binary blobs.
         Platform specific extractors must implement.
         """
-        raise RuntimeError("Must implement")
+        raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
     def copy_files(self, source, destination):
         shutil.copytree(
@@ -131,13 +134,11 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [runfile, f"--extract={tmpdir}", f"--defaultroot={tmpdir}"]
-            try:
-                subprocess.check_call(cmd, env=dict(DISPLAY=""))
-                toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
-                self.copy_files(toolkitpath, self.src_dir)
-            except Exception as exc:
-                raise exc
+            cmd = [runfile, f"--extract={tmpdir}", f"--defaultroot={tmpdir}",
+                   "--override"]
+            subprocess.check_call(cmd, env=dict(DISPLAY=""))
+            toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
+            self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
 
 
@@ -170,10 +171,7 @@ class OsxExtractor(Extractor):
         p.wait()
         subprocess.check_call(["hdiutil", "detach", mntpnt])
 
-        try:
-            shutil.rmtree(mntpnt, ignore_errors=True)
-        except Exception as exc:
-            raise exc
+        shutil.rmtree(mntpnt, ignore_errors=True)
 
     def extract(self):
         runfile = self.blob_dir / self.cu_blob
@@ -186,10 +184,7 @@ class OsxExtractor(Extractor):
         self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
 
-        try:
-            shutil.rmtree(store, ignore_errors=True)
-        except Exception as exc:
-            raise exc
+        shutil.rmtree(store, ignore_errors=True)
 
 
 @contextmanager
@@ -206,7 +201,7 @@ def getplatform():
     elif plt.startswith("darwin"):
         return "osx"
     else:
-        raise RuntimeError("Unsupported platform")
+        raise RuntimeError("Unsupported platform: %s" % (plt))
 
 
 def set_config():

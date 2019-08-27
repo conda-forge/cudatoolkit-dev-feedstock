@@ -131,6 +131,8 @@ remove_symlink_osx() {
 }
 
 
+shopt -s nullglob
+
 UNAME=$(uname)
 if [[ $UNAME == "Linux" ]]; then 
    remove_symlink_linux
@@ -139,3 +141,5 @@ else
    remove_symlink_osx
 
 fi
+
+shopt -u nullglob
