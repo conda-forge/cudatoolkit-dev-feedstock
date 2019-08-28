@@ -129,26 +129,6 @@ class LinuxExtractor(Extractor):
     """
 
     def extract(self):
-        env = None
-        if os.environ.get('CI') == 'azure':
-
-            subprocess.run(['ldd', '--version'])
-            subprocess.run(['env'])
-            subprocess.run(['which', 'gcc'])
-            subprocess.run(['which', 'ldd'])
-
-            env = os.environ.copy()
-            #env['LD_PRELOAD'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib/libc.so.6')
-            env['LD_LIBRARY_PATH'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib')
-            env['PATH'] = env.get('PATH', '') + ':' + os.path.join(os.environ['CONDA_PREFIX'], 'bin')
-            if 1:
-                print('Looking libc.so.6 in', os.environ['PREFIX'])
-                subprocess.run(['find', os.environ['PREFIX'], '-name', 'libc.so.6'])
-                print('Looking libc.so.6 in /')
-                subprocess.run(['find', '/', '-name', 'libc.so.6'])
-                print('Looking gcc in /')
-                subprocess.run(['find', '/', '-name', 'gcc'])
-
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
         os.chmod(runfile, 0o777)
@@ -158,12 +138,12 @@ class LinuxExtractor(Extractor):
                    f"--extract={tmpdir}",
                    #f"--defaultroot={tmpdir}",
                    "--override"]
-            status = subprocess.run(cmd, check=True, env=env)
+            status = subprocess.run(cmd, check=True)
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
             if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
                 raise RuntimeError(
-                    'Something got wrong in executing `{}`: directory `{}` does not exists'
+                    'Something went wrong in executing `{}`: directory `{}` does not exists'
                     .format(' '.join(cmd), toolkitpath))
             self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
