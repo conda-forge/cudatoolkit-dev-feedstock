@@ -139,7 +139,8 @@ class LinuxExtractor(Extractor):
 
             env = os.environ.copy()
             env['LD_PRELOAD'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib/libc.so.6')
-            if not os.path.isfile(env['LD_PRELOAD']):
+            env['LD_LIBRARY_PATH'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib')
+            if 1:
                 print('Looking libc.so.6 in', os.environ['PREFIX'])
                 subprocess.run(['find', os.environ['PREFIX'], '-name', '-name libc.so.6'])
                 print('Looking libc.so.6 in', os.environ['CONDA_PREFIX'])
