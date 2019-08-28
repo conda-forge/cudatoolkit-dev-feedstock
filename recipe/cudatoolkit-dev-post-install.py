@@ -131,6 +131,7 @@ class LinuxExtractor(Extractor):
     def extract(self):
         print(os.environ)
         print(subprocess.run(['ldd', '--version']))
+        print(subprocess.run(['sudo', 'apt-get', 'update']))
 
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
