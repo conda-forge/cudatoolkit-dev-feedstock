@@ -138,14 +138,16 @@ class LinuxExtractor(Extractor):
             subprocess.run(['which', 'ldd'])
 
             env = os.environ.copy()
-            env['LD_PRELOAD'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib/libc.so.6')
+            #env['LD_PRELOAD'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib/libc.so.6')
             env['LD_LIBRARY_PATH'] = os.path.join(os.environ['PREFIX'], os.environ['HOST'], 'sysroot/lib')
             env['PATH'] = env.get('PATH', '') + ':' + os.path.join(os.environ['CONDA_PREFIX'], 'bin')
             if 1:
                 print('Looking libc.so.6 in', os.environ['PREFIX'])
                 subprocess.run(['find', os.environ['PREFIX'], '-name', 'libc.so.6'])
-                print('Looking libc.so.6 in', os.environ['CONDA_PREFIX'])
-                subprocess.run(['find', os.environ['CONDA_PREFIX'], '-name', 'libc.so.6'])
+                print('Looking libc.so.6 in /')
+                subprocess.run(['find', '/', '-name', 'libc.so.6'])
+                print('Looking gcc in /')
+                subprocess.run(['find', '/', '-name', 'gcc'])
 
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
@@ -154,7 +156,7 @@ class LinuxExtractor(Extractor):
         with tempdir() as tmpdir:
             cmd = [str(runfile),
                    f"--extract={tmpdir}",
-                   f"--defaultroot={tmpdir}",
+                   #f"--defaultroot={tmpdir}",
                    "--override"]
             status = subprocess.run(cmd, check=True, env=env)
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
