@@ -134,10 +134,17 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [runfile, f"--extract={tmpdir}", f"--defaultroot={tmpdir}",
+            cmd = [str(runfile),
+                   f"--extract={tmpdir}",
+                   f"--defaultroot={tmpdir}",
                    "--override"]
-            subprocess.check_call(cmd, env=dict(DISPLAY=""))
+            status = subprocess.run(cmd, env=dict(DISPLAY=""), check=True)
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
+            if not os.path.isdir(toolkitpath):
+                print('STATUS:',status)
+                raise RuntimeError(
+                    'Something got wrong in executing `{}`: directory `{}` does not exists'
+                    .format(' '.join(cmd), toolkitpath))
             self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
 
