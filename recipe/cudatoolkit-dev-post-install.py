@@ -129,6 +129,9 @@ class LinuxExtractor(Extractor):
     """
 
     def extract(self):
+        print(os.environ)
+        print(subprocess.run(['ldd', '--version']))
+
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
         os.chmod(runfile, 0o777)
@@ -138,7 +141,7 @@ class LinuxExtractor(Extractor):
                    f"--extract={tmpdir}",
                    f"--defaultroot={tmpdir}",
                    "--override"]
-            status = subprocess.run(cmd, env=dict(DISPLAY=""), check=True)
+            status = subprocess.run(cmd, check=True)
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
             if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
