@@ -129,10 +129,12 @@ class LinuxExtractor(Extractor):
     """
 
     def extract(self):
-        print(os.environ)
-        print(subprocess.run(['ldd', '--version']))
-        print(subprocess.run(['/usr/bin/sudo', 'yum', '-y', 'update', 'glibc']))
-        print(subprocess.run(['ldd', '--version']))
+        if os.environ.get('CI') == 'azure':
+
+            subprocess.run(['ldd', '--version'])
+            subprocess.run(['env'])
+            subprocess.run(['which', 'gcc'])
+            subprocess.run(['which', 'ldd'])
 
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
