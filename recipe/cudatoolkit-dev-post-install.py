@@ -142,6 +142,8 @@ class LinuxExtractor(Extractor):
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
             if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
+                subprocess.run(['ldd', '--version'])
+                subprocess.run(['objdump', '-T', str(runfile)], check=True)
                 raise RuntimeError(
                     'Something went wrong in executing `{}`: directory `{}` does not exists'
                     .format(' '.join(cmd), toolkitpath))
