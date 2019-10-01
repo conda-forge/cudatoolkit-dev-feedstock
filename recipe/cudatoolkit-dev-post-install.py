@@ -30,6 +30,7 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. """
 
+import glob
 import json
 import os
 import shutil
@@ -141,8 +142,18 @@ class LinuxExtractor(Extractor):
             status = subprocess.run(cmd, check=True)
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
             if not os.path.isdir(toolkitpath):
+                installer = (glob.glob(os.path.join(tmpdir, 'cuda-linux*.run')) or [None])[0]
+                if installer is not None:
+                    print('Try using', installer)
+                    subprocess.run(
+                        [installer,
+                         '-prefix=%s' % (toolkitpath),
+                         '-noprompt'  # Implies acceptance of the EULA
+                        ],
+                        check=True
+                    )
+            if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
-                import glob
                 for fn in glob.glob('/tmp/cuda_install_*.log'):
                     f = open(fn, 'r')
                     print('-'*100, fn)
@@ -150,7 +161,7 @@ class LinuxExtractor(Extractor):
                     print('-'*100)
                     f.close()
                 os.system('ldd --version')
-                os.system('ls %s' % (tmpdir))
+                os.system('ls -la %s' % (tmpdir))
                 raise RuntimeError(
                     'Something went wrong in executing `{}`: directory `{}` does not exists'
                     .format(' '.join(cmd), toolkitpath))
