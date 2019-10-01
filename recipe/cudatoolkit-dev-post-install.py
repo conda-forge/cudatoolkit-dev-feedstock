@@ -142,8 +142,14 @@ class LinuxExtractor(Extractor):
             toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
             if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
-                subprocess.run(['ldd', '--version'])
-                subprocess.run(['objdump', '-T', str(runfile)], check=True)
+                if os.path.isfile('/tmp/cuda_install_1080.log'):
+                    f = open('/tmp/cuda_install_1080.log', 'r')
+                    print('-'*100)
+                    print(f.read())
+                    print('-'*100)
+                    f.close()
+                os.system('ldd --version')
+                os.system('objdump -T %s ' % (runfile)])
                 raise RuntimeError(
                     'Something went wrong in executing `{}`: directory `{}` does not exists'
                     .format(' '.join(cmd), toolkitpath))
