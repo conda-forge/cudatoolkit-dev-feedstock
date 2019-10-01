@@ -243,7 +243,7 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
+        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_rhel6.run'
     }
 
     cudatoolkit["osx"] = {"blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'}
