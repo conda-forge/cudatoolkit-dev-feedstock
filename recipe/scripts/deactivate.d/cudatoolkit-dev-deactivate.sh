@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
+set -o pipefail
 
 remove_symlink_linux() {
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/bin/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/bin/*;
         do  
             to_unlink=$(basename ${f});
             
@@ -13,7 +14,7 @@ remove_symlink_linux() {
         done
 
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/lib64/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/lib64/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -24,7 +25,7 @@ remove_symlink_linux() {
         done
 
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/bin/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/bin/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -34,7 +35,7 @@ remove_symlink_linux() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/lib64/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/lib64/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -44,7 +45,7 @@ remove_symlink_linux() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/libdevice/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/libdevice/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -54,7 +55,7 @@ remove_symlink_linux() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/include/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/include/*;
         do 
             to_unlink=$(basename ${f});
 
@@ -67,7 +68,7 @@ remove_symlink_linux() {
 
 remove_symlink_osx() {
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/bin/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/bin/*;
         do  
             to_unlink=$(basename ${f});
             
@@ -78,7 +79,7 @@ remove_symlink_osx() {
         done
 
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/lib/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/lib/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -89,7 +90,7 @@ remove_symlink_osx() {
         done
 
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/bin/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/bin/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -99,7 +100,7 @@ remove_symlink_osx() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/lib/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/lib/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -109,7 +110,7 @@ remove_symlink_osx() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/nvvm/libdevice/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/libdevice/*;
         do  
             to_unlink=$(basename ${f});
 
@@ -119,7 +120,7 @@ remove_symlink_osx() {
             
         done
 
-        for f in $CONDA_PREFIX/pkgs/cudatoolkit-dev/include/*;
+        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/include/*;
         do 
             to_unlink=$(basename ${f});
 
@@ -130,6 +131,8 @@ remove_symlink_osx() {
 }
 
 
+shopt -s nullglob
+
 UNAME=$(uname)
 if [[ $UNAME == "Linux" ]]; then 
    remove_symlink_linux
@@ -138,3 +141,5 @@ else
    remove_symlink_osx
 
 fi
+
+shopt -u nullglob

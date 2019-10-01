@@ -30,33 +30,16 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. """
 
-from __future__ import print_function
-
+import glob
 import json
 import os
 import shutil
-import stat
 import subprocess
 import sys
 import urllib.parse as urlparse
 from pathlib import Path
-
-from conda.exports import download, hashsum_file
-
-
-def set_chmod(file_name):
-    # Do a simple chmod +x for a file within python
-    st = os.stat(file_name)
-    os.chmod(file_name, st.st_mode | stat.S_IXOTH)
-
-
-def copy_files(src, dst):
-    try:
-        if os.path.isfile(src):
-            set_chmod(src)
-            shutil.copy(src, dst)
-    except FileExistsError:
-        pass
+from contextlib import contextmanager
+from tempfile import TemporaryDirectory as tempdir
 
 
 class Extractor(object):
@@ -71,7 +54,7 @@ class Extractor(object):
           platform_config - the configuration for this platform
         """
         self.cu_name = cudatoolkit_config["name"]
-        self.cu_version = cudatoolkit_config["version"]
+        self.cu_version = cudatoolkit_config["release"]
         self.md5_url = cudatoolkit_config["md5_url"]
         self.base_url = cudatoolkit_config["base_url"]
         self.patch_url_text = cudatoolkit_config["patch_url_ext"]
@@ -79,11 +62,11 @@ class Extractor(object):
         self.cu_blob = platform_config["blob"]
         self.conda_prefix = os.environ.get("CONDA_PREFIX")
         self.prefix = os.environ["PREFIX"]
-        self.src_dir = Path(self.conda_prefix) / "pkgs" / self.cu_name
-        os.makedirs(self.src_dir, exist_ok=True)
+        self.src_dir = Path(self.conda_prefix) / "pkgs" / "cuda-toolkit"
+        self.blob_dir = Path(self.conda_prefix) / "pkgs" / self.cu_name
+        os.makedirs(self.blob_dir, exist_ok=True)
 
         self.symlinks = getplatform() == "linux"
-        self.debug_install_path = os.environ.get("DEBUG_INSTALLER_PATH")
 
     def create_activate_and_deactivate_scripts(self):
         activate_dir_path = Path(self.conda_prefix) / "etc" / "conda" / "activate.d"
@@ -99,68 +82,47 @@ class Extractor(object):
         activate_scripts_dir = scripts_dir / "activate.d"
         deactivate_scripts_dir = scripts_dir / "deactivate.d"
 
-        activate_scripts_list = [
-            "cudatoolkit-dev-activate.sh",
-            "cudatoolkit-dev-activate.bat",
-        ]
+        activate_scripts_list = ["cudatoolkit-dev-activate.sh"]
         for file_name in activate_scripts_list:
             file_full_path = activate_scripts_dir / file_name
             shutil.copy(file_full_path, activate_dir_path)
 
-        deactivate_scripts_list = [
-            "cudatoolkit-dev-deactivate.sh",
-            "cudatoolkit-dev-deactivate.bat",
-        ]
+        deactivate_scripts_list = ["cudatoolkit-dev-deactivate.sh"]
 
         for file_name in deactivate_scripts_list:
             file_full_path = deactivate_scripts_dir / file_name
             shutil.copy(file_full_path, deactivate_dir_path)
 
+    def download(self, url, target_full_path):
+        cmd = ["wget", url, "-O", target_full_path, "-q"]
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError as exc:
+            raise exc
+
     def download_blobs(self):
-        """Downloads the binary blobs to the $SRC_DIR
+        """Downloads the binary blobs to the $BLOB_DIR
         """
         dl_url = urlparse.urljoin(self.base_url, self.installers_url_ext)
         dl_url = urlparse.urljoin(dl_url, self.cu_blob)
-        dl_path = os.path.join(self.src_dir, self.cu_blob)
-        if not self.debug_install_path:
-            print("downloading %s to %s" % (dl_url, dl_path))
-            download(dl_url, dl_path)
+        dl_path = os.path.join(self.blob_dir, self.cu_blob)
 
+        if os.path.isfile(dl_path):
+            print("re-using previously downloaded %s" % (dl_path))
         else:
-            existing_file = os.path.join(self.debug_install_path, self.cu_blob)
-            print("DEBUG: copying %s to %s" % (existing_file, dl_path))
-            shutil.copy(existing_file, dl_path)
-
-    def check_md5(self):
-        """Checks the md5sums of the downloaded binaries
-        """
-        md5file = self.md5_url.split("/")[-1]
-        path = os.path.join(self.src_dir, md5file)
-        download(self.md5_url, path)
-
-        # compute hash of blob
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        md5sum = hashsum_file(blob_path, "md5")
-
-        # get checksums
-        with open(path, "r") as f:
-            checksums = [x.strip().split() for x in f.read().splitlines() if x]
-
-        # check md5 and filename match up
-        check_dict = {x[0]: x[1] for x in checksums}
-        assert check_dict[md5sum].startswith(self.cu_blob[:-7])
+            print("downloading %s to %s" % (dl_url, dl_path))
+        self.download(dl_url, dl_path)
 
     def extract(self, *args):
         """The method to extract files from the cuda binary blobs.
         Platform specific extractors must implement.
         """
-        raise RuntimeError("Must implement")
+        raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
-    def cleanup(self):
-        """The method to delete unnecessary files after
-        the installation process.
-        """
-        raise RuntimeError("Must implement")
+    def copy_files(self, source, destination):
+        shutil.copytree(
+            source, destination, symlinks=True, ignore_dangling_symlinks=True
+        )
 
 
 class LinuxExtractor(Extractor):
@@ -169,121 +131,94 @@ class LinuxExtractor(Extractor):
 
     def extract(self):
         print("Extracting on Linux")
-        runfile = os.path.join(self.src_dir, self.cu_blob)
+        runfile = self.blob_dir / self.cu_blob
         os.chmod(runfile, 0o777)
-        cmd = [
-            runfile,
-            "--silent",
-            "--toolkit",
-            "--toolkitpath",
-            str(self.src_dir),
-            "--override",
-        ]
-        try:
-            subprocess.check_call(cmd)
-        except subprocess.CalledProcessError as e:
-            print(
-                "ERROR: Couldn't install Cudatoolkit: \
-                   {reason}".format(
-                    reason=e
-                )
-            )
 
-    def cleanup(self):
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        if os.path.exists(blob_path):
-            os.remove(blob_path)
-
-        else:
-            pass
+        with tempdir() as tmpdir:
+            cmd = [str(runfile),
+                   f"--extract={tmpdir}",
+                   #f"--defaultroot={tmpdir}",
+                   "--override"]
+            status = subprocess.run(cmd, check=True)
+            toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
+            if not os.path.isdir(toolkitpath):
+                installer = (glob.glob(os.path.join(tmpdir, 'cuda-linux*.run')) or [None])[0]
+                if installer is not None:
+                    print('Try using', installer)
+                    subprocess.run(
+                        [installer,
+                         '-prefix=%s' % (toolkitpath),
+                         '-noprompt'  # Implies acceptance of the EULA
+                        ],
+                        check=True
+                    )
+            if not os.path.isdir(toolkitpath):
+                print('STATUS:',status)
+                for fn in glob.glob('/tmp/cuda_install_*.log'):
+                    f = open(fn, 'r')
+                    print('-'*100, fn)
+                    print(f.read())
+                    print('-'*100)
+                    f.close()
+                os.system('ldd --version')
+                os.system('ls -la %s' % (tmpdir))
+                raise RuntimeError(
+                    'Something went wrong in executing `{}`: directory `{}` does not exists'
+                    .format(' '.join(cmd), toolkitpath))
+            self.copy_files(toolkitpath, self.src_dir)
+        os.remove(runfile)
 
 
 class OsxExtractor(Extractor):
     """The osx Extractor
     """
 
-    def _hdiutil_mount(self, temp_dir, file_name, install_dir):
-        """Function to mount osx dmg images, extracts the files
-           from an image into store and ensure they are
-           unmounted on exit.
+    def _mount_extract(self, image, store):
+        """Mounts and extracts the files from an image into store
         """
-        # open
-        cmd = ["hdiutil", "attach", "-mountpoint", temp_dir, file_name]
-        cmd = " ".join(cmd)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        process.wait()
-        # find tar.gz files
-        cmd = [
-            "find",
-            temp_dir,
-            "-name",
-            '"*.tar.gz"',
-            "-exec",
-            "tar",
-            "xvf",
-            "'{}'",
-            "--directory",
-            install_dir,
-            "';'",
-        ]
-        cmd = " ".join(cmd)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        process.wait()
-        # close
-        cmd = ["hdiutil", "detach", temp_dir]
-        cmd = " ".join(cmd)
-        process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        process.wait()
-
-    def copy_files(self):
-        src = (
-            Path(self.extract_temp_dir)
-            / "Developer"
-            / "NVIDIA"
-            / "CUDA-{}".format(self.cu_version)
+        mntpnt = str(self.blob_dir / "tmpstore")
+        os.makedirs(mntpnt, exist_ok=True)
+        subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
+        cmd = " ".join(
+            [
+                "find",
+                mntpnt,
+                "-name",
+                '"*.tar.gz"',
+                "-exec",
+                "tar",
+                "xvf",
+                "{}",
+                f"--directory={store}",
+                "';'",
+            ]
         )
-        dst = self.src_dir
 
-        for f in os.listdir(src):
-            source = src / f
-            destination = dst / f
-            try:
-                shutil.copytree(source, destination)
-            except NotADirectoryError:
-                shutil.copy(source, destination)
-            except FileExistsError:
-                pass
+        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
+        p.wait()
+        subprocess.check_call(["hdiutil", "detach", mntpnt])
+
+        shutil.rmtree(mntpnt, ignore_errors=True)
 
     def extract(self):
-        runfile = os.path.join(self.src_dir, self.cu_blob)
-        extract_store_name = "tmpstore"
-        extract_temp_dir_name = "tmp"
-        self.extract_store = os.path.join(self.src_dir, extract_store_name)
-        self.extract_temp_dir = os.path.join(self.src_dir, extract_temp_dir_name)
-        os.makedirs(self.extract_store, exist_ok=True)
-        os.makedirs(self.extract_temp_dir, exist_ok=True)
-        self._hdiutil_mount(self.extract_store, runfile, self.extract_temp_dir)
-        self.copy_files()
+        runfile = self.blob_dir / self.cu_blob
+        store = str(self.blob_dir / "store")
+        os.makedirs(store, exist_ok=True)
+        self._mount_extract(runfile, store)
+        toolkitpath = (
+            Path(store) / "Developer" / "NVIDIA" / "CUDA-{}".format(self.cu_version)
+        )
+        self.copy_files(toolkitpath, self.src_dir)
+        os.remove(runfile)
 
-    def cleanup(self):
-        blob_path = os.path.join(self.src_dir, self.cu_blob)
-        if os.path.exists(blob_path):
-            os.remove(blob_path)
+        shutil.rmtree(store, ignore_errors=True)
 
-        else:
-            pass
 
-        try:
-            shutil.rmtree(self.extract_store)
-
-        except FileNotFoundError:
-            pass
-
-        try:
-            shutil.rmtree(self.extract_temp_dir)
-
-        except FileNotFoundError:
-            pass
+@contextmanager
+def _hdiutil_mount(mntpnt, image):
+    subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
+    yield mntpnt
+    subprocess.check_call(["hdiutil", "detach", mntpnt])
 
 
 def getplatform():
@@ -293,7 +228,7 @@ def getplatform():
     elif plt.startswith("darwin"):
         return "osx"
     else:
-        raise RuntimeError("Unknown platform")
+        raise RuntimeError("Unsupported platform: %s" % (plt))
 
 
 def set_config():
@@ -305,31 +240,33 @@ def set_config():
     with open(prefix / "bin" / "cudatoolkit-dev-extra-args.json", "r") as f:
         extra_args = json.loads(f.read())
 
-    # package version decl must match cuda release version
     cudatoolkit["version"] = os.environ["PKG_VERSION"]
     cudatoolkit["name"] = os.environ["PKG_NAME"]
     cudatoolkit["buildnum"] = os.environ["PKG_BUILDNUM"]
     cudatoolkit["version_build"] = extra_args["version_build"]
     cudatoolkit["driver_version"] = extra_args["driver_version"]
+    cudatoolkit["release"] = extra_args["release"]
 
-    url_dev = os.environ.get("PROXY_DEV_NVIDIA", "https://developer.nvidia.com/")
-    url_dev_download = os.environ.get("PROXY_DEV_DOWNLOAD_NVIDIA",
-                                      "http://developer.download.nvidia.com/")
-    url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/Prod/'
+    url_dev = os.environ.get(
+        "PROXY_DEV_NVIDIA", "https://developer.download.nvidia.com/"
+    )
+    url_dev_download = os.environ.get(
+        "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
+    )
+    url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
     cudatoolkit["base_url"] = urlparse.urljoin(url_dev, url_prod_ext)
-    cudatoolkit["md5_url"] = urlparse.urljoin(url_dev_download,
-                                              url_prod_ext + 'docs/sidebar/md5sum.txt')
+    cudatoolkit["md5_url"] = urlparse.urljoin(
+        url_dev_download, url_prod_ext + "docs/sidebar/md5sum.txt"
+    )
 
     cudatoolkit["installers_url_ext"] = f"local_installers/"
     cudatoolkit["patch_url_ext"] = f""
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_{cudatoolkit["driver_version"]}_linux'
+        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_rhel6.run'
     }
 
-    cudatoolkit["osx"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}.{cudatoolkit["version_build"]}_mac'
-    }
+    cudatoolkit["osx"] = {"blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'}
 
     return cudatoolkit
 
@@ -354,14 +291,8 @@ def _main():
     # download binaries
     extractor.download_blobs()
 
-    # check md5sum
-    extractor.check_md5()
-
     # Extract
     extractor.extract()
-
-    # Cleanup
-    extractor.cleanup()
 
 
 if __name__ == "__main__":

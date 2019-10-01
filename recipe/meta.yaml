@@ -1,32 +1,31 @@
 {% set name = "cudatoolkit-dev" %}
-{% set version = "10.0" %}
-{% set version_build = "130" %}
-{% set driver_version = "410.48" %}
+{% set release = "10.1" %}
+{% set version_build = "243" %}
+{% set driver_version = "418.87.00" %}
 
 package:
   name: {{ name|lower }}
-  version: {{ version }}
+  version: {{ release }}.{{ version_build }}
 
 source:
   path: ./
 
 build:
-  script: python build.py {{ version }} {{ version_build }} {{ driver_version }}
-  number: 2
+  script: python build.py {{ release }} {{ version_build }} {{ driver_version }}
+  number: 0
   skip: True  # [win]
 
 requirements:
   host:
-    - python >=3
-    - conda
+    - python >=3.6
+    - wget
+
 test:
   requires:
-    - conda
-  commands:
-    - test -f $PREFIX/bin/cudatoolkit-dev-post-install.py  # [unix]
-    - test -f $PREFIX/bin/cudatoolkit-dev-extra-args.json  # [unix]
-    - test -d $PREFIX/scripts/activate.d  # [unix]
-    - test -d $PREFIX/scripts/deactivate.d  # [unix]
+    - numba
+    - wget
+    - {{ compiler('c') }}
+
 
 about:
   home: "https://developer.nvidia.com"
