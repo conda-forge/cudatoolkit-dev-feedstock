@@ -278,6 +278,8 @@ def _main():
 
     print("Running Post installation")
 
+    os.environ['DISPLAY'] = ''
+
     cudatoolkit_config = set_config()
 
     # get an extractor
