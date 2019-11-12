@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 Adapted from https://github.com/numba/conda-recipe-cudatoolkit
 
@@ -120,9 +121,14 @@ class Extractor(object):
         raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
     def copy_files(self, source, destination):
-        shutil.copytree(
-            source, destination, symlinks=True, ignore_dangling_symlinks=True, dirs_exist_ok=True
-        )
+        dest = Path(destination)
+        if dest.exists() and dest.is_dir():
+            shutil.rmtree(dest, ignore_errors=True)
+        elif dest.exists() and dest.is_file():
+            dest.unlink()
+        else:
+            shutil.copytree(
+                source, destination, symlinks=True, ignore_dangling_symlinks=True)
 
 
 class LinuxExtractor(Extractor):
