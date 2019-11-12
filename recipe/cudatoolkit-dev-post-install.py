@@ -121,7 +121,7 @@ class Extractor(object):
 
     def copy_files(self, source, destination):
         shutil.copytree(
-            source, destination, symlinks=True, ignore_dangling_symlinks=True
+            source, destination, symlinks=True, ignore_dangling_symlinks=True, dirs_exist_ok=True
         )
 
 
