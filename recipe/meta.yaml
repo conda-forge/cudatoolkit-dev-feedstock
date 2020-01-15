@@ -16,7 +16,7 @@ build:
   skip: True  # [win]
 
 requirements:
-  host:
+  build:
     - python >=3.6
     - wget
 
