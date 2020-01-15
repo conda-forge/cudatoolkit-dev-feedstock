@@ -27,8 +27,6 @@ def _main(args):
     prefix_dir_path = Path(os.environ["PREFIX"])
     prefix_bin_dir_path = prefix_dir_path / "bin"
     recipe_dir_path = Path(os.environ["RECIPE_DIR"])
-    scripts_dir_path = recipe_dir_path / "scripts"
-    shutil.copytree(scripts_dir_path, prefix_dir_path / "scripts")
 
     # Copy cudatoolkit-dev-post-install.py to $PREFIX/bin
     src = recipe_dir_path / "cudatoolkit-dev-post-install.py"
