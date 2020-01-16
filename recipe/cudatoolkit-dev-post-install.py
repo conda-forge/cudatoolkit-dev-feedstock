@@ -68,31 +68,6 @@ class Extractor(object):
 
         self.symlinks = getplatform() == "linux"
 
-    def create_activate_and_deactivate_scripts(self):
-        activate_dir_path = Path(self.conda_prefix) / "etc" / "conda" / "activate.d"
-        deactivate_dir_path = Path(self.conda_prefix) / "etc" / "conda" / "deactivate.d"
-
-        os.makedirs(activate_dir_path, exist_ok=True)
-        os.makedirs(deactivate_dir_path, exist_ok=True)
-
-        # Copy cudatoolkit-dev-activate and cudatoolkit-dev-deactivate
-        # to activate.d and deactivate.d directories
-
-        scripts_dir = Path(self.prefix) / "scripts"
-        activate_scripts_dir = scripts_dir / "activate.d"
-        deactivate_scripts_dir = scripts_dir / "deactivate.d"
-
-        activate_scripts_list = ["cudatoolkit-dev-activate.sh"]
-        for file_name in activate_scripts_list:
-            file_full_path = activate_scripts_dir / file_name
-            shutil.copy(file_full_path, activate_dir_path)
-
-        deactivate_scripts_list = ["cudatoolkit-dev-deactivate.sh"]
-
-        for file_name in deactivate_scripts_list:
-            file_full_path = deactivate_scripts_dir / file_name
-            shutil.copy(file_full_path, deactivate_dir_path)
-
     def download(self, url, target_full_path):
         cmd = ["wget", url, "-O", target_full_path, "-q"]
         try:
@@ -286,9 +261,6 @@ def _main():
     plat = getplatform()
     extractor_impl = dispatcher[plat]
     extractor = extractor_impl(cudatoolkit_config, cudatoolkit_config[plat])
-
-    # create activate and deactivate scripts
-    extractor.create_activate_and_deactivate_scripts()
 
     # download binaries
     extractor.download_blobs()
