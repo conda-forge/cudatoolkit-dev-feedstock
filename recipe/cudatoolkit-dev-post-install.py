@@ -113,7 +113,7 @@ class LinuxExtractor(Extractor):
             if int(self.cu_version.split(".")[0]) > 10:
                 cmd = [
                     str(runfile),
-                    "-silent",
+                    "--silent",
                     "--toolkit",
                     f"--toolkitpath={tmpdir}",
                     "--override"
