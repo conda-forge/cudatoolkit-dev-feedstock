@@ -110,36 +110,47 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [str(runfile),
-                   f"--extract={tmpdir}",
-                   #f"--defaultroot={tmpdir}",
-                   "--override"]
-            status = subprocess.run(cmd, check=True)
-            toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
-            if not os.path.isdir(toolkitpath):
-                installer = (glob.glob(os.path.join(tmpdir, 'cuda-linux*.run')) or [None])[0]
-                if installer is not None:
-                    print('Try using', installer)
-                    subprocess.run(
-                        [installer,
-                         '-prefix=%s' % (toolkitpath),
-                         '-noprompt'  # Implies acceptance of the EULA
-                        ],
-                        check=True
-                    )
-            if not os.path.isdir(toolkitpath):
-                print('STATUS:',status)
-                for fn in glob.glob('/tmp/cuda_install_*.log'):
-                    f = open(fn, 'r')
-                    print('-'*100, fn)
-                    print(f.read())
-                    print('-'*100)
-                    f.close()
-                os.system('ldd --version')
-                os.system('ls -la %s' % (tmpdir))
-                raise RuntimeError(
-                    'Something went wrong in executing `{}`: directory `{}` does not exists'
-                    .format(' '.join(cmd), toolkitpath))
+            if int(self.cu_version.split(".")[0]) > 10:
+                cmd = [
+                    str(runfile),
+                    "-silent",
+                    "--toolkit",
+                    f"--toolkitpath={tmpdir}",
+                    "--override"
+                ]
+                subprocess.run(cmd, check=True)
+                toolkitpath = tmpdir
+            else:
+                cmd = [str(runfile),
+                    f"--extract={tmpdir}",
+                    #f"--defaultroot={tmpdir}",
+                    "--override"]
+                status = subprocess.run(cmd, check=True)
+                toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
+                if not os.path.isdir(toolkitpath):
+                    installer = (glob.glob(os.path.join(tmpdir, 'cuda-linux*.run')) or [None])[0]
+                    if installer is not None:
+                        print('Try using', installer)
+                        subprocess.run(
+                            [installer,
+                            '-prefix=%s' % (toolkitpath),
+                            '-noprompt'  # Implies acceptance of the EULA
+                            ],
+                            check=True
+                        )
+                if not os.path.isdir(toolkitpath):
+                    print('STATUS:',status)
+                    for fn in glob.glob('/tmp/cuda_install_*.log'):
+                        f = open(fn, 'r')
+                        print('-'*100, fn)
+                        print(f.read())
+                        print('-'*100)
+                        f.close()
+                    os.system('ldd --version')
+                    os.system('ls -la %s' % (tmpdir))
+                    raise RuntimeError(
+                        'Something went wrong in executing `{}`: directory `{}` does not exists'
+                        .format(' '.join(cmd), toolkitpath))
             self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
 
