@@ -118,7 +118,7 @@ class LinuxExtractor(Extractor):
                     f"--toolkitpath={tmpdir}",
                     "--override"
                 ]
-                subprocess.run(cmd, check=True)
+                subprocess.run(cmd, env=os.environ.copy(), check=True)
                 toolkitpath = tmpdir
             else:
                 cmd = [str(runfile),
