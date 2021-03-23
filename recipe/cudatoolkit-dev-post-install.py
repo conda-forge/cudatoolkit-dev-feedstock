@@ -228,7 +228,10 @@ def set_config():
     url_dev_download = os.environ.get(
         "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
     )
-    url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
+    if int(cudatoolkit["release"]) < 11:
+        url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
+    else:
+        url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/'
     cudatoolkit["base_url"] = urlparse.urljoin(url_dev, url_prod_ext)
     cudatoolkit["md5_url"] = urlparse.urljoin(
         url_dev_download, url_prod_ext + "docs/sidebar/md5sum.txt"
@@ -238,7 +241,7 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_rhel6.run'
+        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
     }
 
     cudatoolkit["osx"] = {"blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'}
