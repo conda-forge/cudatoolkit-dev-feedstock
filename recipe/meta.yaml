@@ -24,9 +24,8 @@ test:
   requires:
     - numba
     - wget
-    - glibc
+    - glib
     - {{ compiler('c') }}
-
 
 about:
   home: "https://developer.nvidia.com"
