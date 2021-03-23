@@ -111,7 +111,7 @@ install_glibc_214() {
     make install
     popd
 
-    export LD_LIBRARY_PATH="${install_dir}/lib:${CONDA_PREFIX}/lib:${$LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${install_dir}/lib:${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
 }
 
 # Install GLIBC 2.14 on azure ci
