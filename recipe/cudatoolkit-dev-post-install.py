@@ -228,7 +228,7 @@ def set_config():
     url_dev_download = os.environ.get(
         "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
     )
-    if int(cudatoolkit["release"]) < 11:
+    if int(cudatoolkit["release"].split(".")[0]) < 11:
         url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
     else:
         url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/'
