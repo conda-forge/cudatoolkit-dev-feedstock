@@ -24,7 +24,6 @@ test:
   requires:
     - numba
     - wget
-    - glib
     - {{ compiler('c') }}
 
 about:

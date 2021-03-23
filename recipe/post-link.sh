@@ -101,6 +101,20 @@ create_symlink_osx() {
 
 }
 
+# Install GLIBC 2.14 on azure ci
+if [[ "$CI" == "azure" ]]; then
+    wget http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
+    tar zxvf glibc-2.14.tar.gz
+    mkdir -p glibc-2.14/build
+    pushd glibc-2.14/build
+    ../configure --prefix=/opt/glibc-2.14
+    make -j4
+    sudo make install
+    popd
+
+    export LD_LIBRARY_PATH="/opt/glibc-2.14/lib:${$LD_LIBRARY_PATH}"
+fi
+
 test -d $CONDA_PREFIX/pkgs/cuda-toolkit || exit 1
 
 mkdir -p $CONDA_PREFIX/bin
