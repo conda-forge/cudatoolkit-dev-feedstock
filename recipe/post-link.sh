@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -o pipefail
 
-python $PREFIX/bin/cudatoolkit-dev-post-install.py
-
 
 create_symlink_linux() {
 
@@ -101,19 +99,28 @@ create_symlink_osx() {
 
 }
 
-# Install GLIBC 2.14 on azure ci
-if [[ "$CI" == "azure" ]]; then
-    wget http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
-    tar zxvf glibc-2.14.tar.gz
-    mkdir -p glibc-2.14/build
-    pushd glibc-2.14/build
-    ../configure --prefix=/opt/glibc-2.14
+install_glibc_214() {
+    wget -q http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
+    tar zxf glibc-2.14.tar.gz
+    build_dir=$(pwd)/glibc-2.14/build
+    install_dir=$(pwd)/glibc-2.14/pkg
+    mkdir -p $build_dir
+    pushd $build_dir
+    ../configure --prefix=$install_dir
     make -j4
-    sudo make install
+    make install
     popd
 
-    export LD_LIBRARY_PATH="/opt/glibc-2.14/lib:${$LD_LIBRARY_PATH}"
+    export LD_LIBRARY_PATH="${install_dir}/lib:${$LD_LIBRARY_PATH}"
+}
+
+# Install GLIBC 2.14 on azure ci
+if [[ "$CI" == "azure" ]]; then
+    install_glibc_214
 fi
+
+python $PREFIX/bin/cudatoolkit-dev-post-install.py
+
 
 test -d $CONDA_PREFIX/pkgs/cuda-toolkit || exit 1
 
