@@ -119,9 +119,7 @@ if [[ "$CI" == "azure" ]]; then
     install_glibc_214
 fi
 
-echo "======== $LD_LIBRARY_PATH"
 python $PREFIX/bin/cudatoolkit-dev-post-install.py
-
 
 test -d $CONDA_PREFIX/pkgs/cuda-toolkit || exit 1
 
