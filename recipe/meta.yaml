@@ -13,7 +13,7 @@ source:
 build:
   script: python build.py {{ release }} {{ version_build }} {{ driver_version }}
   number: 3
-  skip: True  # [win osx]
+  skip: True  # [win] [osx]
 
 requirements:
   build:
