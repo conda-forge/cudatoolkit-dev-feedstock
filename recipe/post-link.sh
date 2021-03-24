@@ -82,6 +82,6 @@ mkdir -p $CONDA_PREFIX/include
 
 shopt -s nullglob
 
-create_symlink_osx
+create_symlink_linux
 
 shopt -u nullglob
