@@ -52,53 +52,6 @@ create_symlink_linux() {
 }
 
 
-create_symlink_osx() { 
-        
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/bin/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/bin/${link};
-        done
-
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/lib/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/lib/${link};
-
-        done
-
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/bin/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/bin/${link};
-
-        done
-
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/lib/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/lib/${link};
-
-        done
-
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm/libdevice/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/lib/${link};
-
-        done
-
-        for f in $CONDA_PREFIX/pkgs/cuda-toolkit/include/*;
-        do 
-            link=$(basename "$f");
-            ln -sf $f $CONDA_PREFIX/include/${link};
-
-        done
-
-        ln -sf $CONDA_PREFIX/pkgs/cuda-toolkit/nvvm $CONDA_PREFIX/
-
-}
-
 install_glibc_214() {
     wget -q http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
     tar zxf glibc-2.14.tar.gz
@@ -129,12 +82,6 @@ mkdir -p $CONDA_PREFIX/include
 
 shopt -s nullglob
 
-UNAME=$(uname)
-if [[ $UNAME == "Linux" ]]; then 
-    create_symlink_linux
-else
-    create_symlink_osx
-
-fi
+create_symlink_osx
 
 shopt -u nullglob
