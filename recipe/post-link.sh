@@ -52,26 +52,6 @@ create_symlink_linux() {
 }
 
 
-install_glibc_214() {
-    wget -q http://ftp.gnu.org/gnu/glibc/glibc-2.14.tar.gz
-    tar zxf glibc-2.14.tar.gz
-    build_dir=$(pwd)/glibc-2.14/build
-    install_dir=$(pwd)/glibc-2.14/pkg
-    mkdir -p $build_dir
-    pushd $build_dir
-    ../configure --prefix=$install_dir
-    make -j4
-    make install
-    popd
-
-    export LD_LIBRARY_PATH="${install_dir}/lib:${CONDA_PREFIX}/lib:${LD_LIBRARY_PATH}"
-}
-
-# Install GLIBC 2.14 on azure ci
-if [[ "$CI" == "azure" ]]; then
-    install_glibc_214
-fi
-
 python $PREFIX/bin/cudatoolkit-dev-post-install.py
 
 test -d $CONDA_PREFIX/pkgs/cuda-toolkit || exit 1

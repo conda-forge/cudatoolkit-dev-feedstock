@@ -1,0 +1,4 @@
+# Workaround https://github.com/conda-forge/conda-smithy/issues/1459 :
+docker_image:
+  - quay.io/condaforge/linux-anvil-cos7-x86_64
+  - quay.io/condaforge/linux-anvil-cos7-x86_64
