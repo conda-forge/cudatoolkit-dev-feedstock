@@ -1,7 +1,7 @@
 {% set name = "cudatoolkit-dev" %}
-{% set release = "10.1" %}
-{% set version_build = "243" %}
-{% set driver_version = "418.87.00" %}
+{% set release = "11.0" %}
+{% set version_build = "3" %}
+{% set driver_version = "450.51.06" %}
 
 package:
   name: {{ name|lower }}
@@ -12,8 +12,9 @@ source:
 
 build:
   script: python build.py {{ release }} {{ version_build }} {{ driver_version }}
-  number: 3
+  number: 0
   skip: True  # [win]
+  skip: True  # [osx]
 
 requirements:
   build:
@@ -25,7 +26,6 @@ test:
     - numba
     - wget
     - {{ compiler('c') }}
-
 
 about:
   home: "https://developer.nvidia.com"
@@ -51,3 +51,4 @@ extra:
     - andersy005
     - scopatz
     - xmnlab
+    - AgrawalAmey

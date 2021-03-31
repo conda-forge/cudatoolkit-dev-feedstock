@@ -47,7 +47,7 @@ class Extractor(object):
     from this class.
     """
 
-    def __init__(self, cudatoolkit_config, platform_config):
+    def __init__(self, cudatoolkit_config):
         """Initialise an instance:
         Arguments:
           cudatoolkit_config: the configuration for CUDA
@@ -59,14 +59,12 @@ class Extractor(object):
         self.base_url = cudatoolkit_config["base_url"]
         self.patch_url_text = cudatoolkit_config["patch_url_ext"]
         self.installers_url_ext = cudatoolkit_config["installers_url_ext"]
-        self.cu_blob = platform_config["blob"]
+        self.cu_blob = cudatoolkit_config["blob"]
         self.conda_prefix = os.environ.get("CONDA_PREFIX")
         self.prefix = os.environ["PREFIX"]
         self.src_dir = Path(self.conda_prefix) / "pkgs" / "cuda-toolkit"
         self.blob_dir = Path(self.conda_prefix) / "pkgs" / self.cu_name
         os.makedirs(self.blob_dir, exist_ok=True)
-
-        self.symlinks = getplatform() == "linux"
 
     def download(self, url, target_full_path):
         cmd = ["wget", url, "-O", target_full_path, "-q"]
@@ -110,23 +108,16 @@ class LinuxExtractor(Extractor):
         os.chmod(runfile, 0o777)
 
         with tempdir() as tmpdir:
-            cmd = [str(runfile),
-                   f"--extract={tmpdir}",
-                   #f"--defaultroot={tmpdir}",
-                   "--override"]
-            status = subprocess.run(cmd, check=True)
-            toolkitpath = os.path.join(tmpdir, "cuda-toolkit")
-            if not os.path.isdir(toolkitpath):
-                installer = (glob.glob(os.path.join(tmpdir, 'cuda-linux*.run')) or [None])[0]
-                if installer is not None:
-                    print('Try using', installer)
-                    subprocess.run(
-                        [installer,
-                         '-prefix=%s' % (toolkitpath),
-                         '-noprompt'  # Implies acceptance of the EULA
-                        ],
-                        check=True
-                    )
+            cmd = [
+                str(runfile),
+                "--silent",
+                "--toolkit",
+                f"--toolkitpath={tmpdir}",
+                "--override"
+            ]
+            subprocess.run(cmd, env=os.environ.copy(), check=True)
+            toolkitpath = tmpdir
+
             if not os.path.isdir(toolkitpath):
                 print('STATUS:',status)
                 for fn in glob.glob('/tmp/cuda_install_*.log'):
@@ -140,53 +131,9 @@ class LinuxExtractor(Extractor):
                 raise RuntimeError(
                     'Something went wrong in executing `{}`: directory `{}` does not exists'
                     .format(' '.join(cmd), toolkitpath))
+
             self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
-
-
-class OsxExtractor(Extractor):
-    """The osx Extractor
-    """
-
-    def _mount_extract(self, image, store):
-        """Mounts and extracts the files from an image into store
-        """
-        mntpnt = str(self.blob_dir / "tmpstore")
-        os.makedirs(mntpnt, exist_ok=True)
-        subprocess.check_call(["hdiutil", "attach", "-mountpoint", mntpnt, image])
-        cmd = " ".join(
-            [
-                "find",
-                mntpnt,
-                "-name",
-                '"*.tar.gz"',
-                "-exec",
-                "tar",
-                "xvf",
-                "{}",
-                f"--directory={store}",
-                "';'",
-            ]
-        )
-
-        p = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE)
-        p.wait()
-        subprocess.check_call(["hdiutil", "detach", mntpnt])
-
-        shutil.rmtree(mntpnt, ignore_errors=True)
-
-    def extract(self):
-        runfile = self.blob_dir / self.cu_blob
-        store = str(self.blob_dir / "store")
-        os.makedirs(store, exist_ok=True)
-        self._mount_extract(runfile, store)
-        toolkitpath = (
-            Path(store) / "Developer" / "NVIDIA" / "CUDA-{}".format(self.cu_version)
-        )
-        self.copy_files(toolkitpath, self.src_dir)
-        os.remove(runfile)
-
-        shutil.rmtree(store, ignore_errors=True)
 
 
 @contextmanager
@@ -196,12 +143,10 @@ def _hdiutil_mount(mntpnt, image):
     subprocess.check_call(["hdiutil", "detach", mntpnt])
 
 
-def getplatform():
+def check_platform():
     plt = sys.platform
     if plt.startswith("linux"):
-        return "linux"
-    elif plt.startswith("darwin"):
-        return "osx"
+        return
     else:
         raise RuntimeError("Unsupported platform: %s" % (plt))
 
@@ -209,7 +154,7 @@ def getplatform():
 def set_config():
     """Set necessary configurations"""
 
-    cudatoolkit = {"linux": {}, "osx": {}}
+    cudatoolkit = {}
     prefix = Path(os.environ["PREFIX"])
     extra_args = dict()
     with open(prefix / "bin" / "cudatoolkit-dev-extra-args.json", "r") as f:
@@ -228,7 +173,7 @@ def set_config():
     url_dev_download = os.environ.get(
         "PROXY_DEV_DOWNLOAD_NVIDIA", "http://developer.download.nvidia.com/"
     )
-    url_prod_ext = f'compute/cuda/{cudatoolkit["release"]}/Prod/'
+    url_prod_ext = f'compute/cuda/{cudatoolkit["version"]}/'
     cudatoolkit["base_url"] = urlparse.urljoin(url_dev, url_prod_ext)
     cudatoolkit["md5_url"] = urlparse.urljoin(
         url_dev_download, url_prod_ext + "docs/sidebar/md5sum.txt"
@@ -237,16 +182,9 @@ def set_config():
     cudatoolkit["installers_url_ext"] = f"local_installers/"
     cudatoolkit["patch_url_ext"] = f""
 
-    cudatoolkit["linux"] = {
-        "blob": f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_rhel6.run'
-    }
-
-    cudatoolkit["osx"] = {"blob": f'cuda_{cudatoolkit["version"]}_mac.dmg'}
+    cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
 
     return cudatoolkit
-
-
-dispatcher = {"linux": LinuxExtractor, "osx": OsxExtractor}
 
 
 def _main():
@@ -258,9 +196,8 @@ def _main():
     cudatoolkit_config = set_config()
 
     # get an extractor
-    plat = getplatform()
-    extractor_impl = dispatcher[plat]
-    extractor = extractor_impl(cudatoolkit_config, cudatoolkit_config[plat])
+    check_platform()
+    extractor = LinuxExtractor(cudatoolkit_config)
 
     # download binaries
     extractor.download_blobs()
