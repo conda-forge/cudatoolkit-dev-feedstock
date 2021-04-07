@@ -12,14 +12,16 @@ source:
 
 build:
   script: python build.py {{ release }} {{ version_build }} {{ driver_version }}
-  number: 0
+  number: 1
   skip: True  # [win]
   skip: True  # [osx]
 
 requirements:
   build:
-    - python >=3.6
+    - python
     - wget
+  run:
+    - python
 
 test:
   requires:
@@ -29,8 +31,7 @@ test:
 
 about:
   home: "https://developer.nvidia.com"
-  license: "other"
-  license_family: "other"
+  license: LicenseRef-NVIDIA-End-User-License-Agreement
   license_url: https://docs.nvidia.com/cuda/eula/index.html
   summary: "Develop, Optimize and Deploy GPU-accelerated Apps"
   description: |
