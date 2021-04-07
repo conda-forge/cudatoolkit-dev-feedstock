@@ -31,8 +31,7 @@ test:
 
 about:
   home: "https://developer.nvidia.com"
-  license: "other"
-  license_family: "other"
+  license: LicenseRef-NVIDIA-End-User-License-Agreement
   license_url: https://docs.nvidia.com/cuda/eula/index.html
   summary: "Develop, Optimize and Deploy GPU-accelerated Apps"
   description: |
