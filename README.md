@@ -24,6 +24,17 @@ This package consists of a post-install script that downloads and
 installs the full cuda toolkit(compiler, libraries, with the exception of cuda drivers).
 
 
+Differences between this package and cudatoolkit from the main Anaconda channel
+-------------------------------------------------------------------------------
+
+When you install cudatoolkit-dev, in addition to libraries; you get the compiler (nvcc), the profiler (nvprof), etc. 
+In other words, you get the exact outcome as what you would get when installing cudatoolkit 
+by following installation steps from https://developer.nvidia.com/cuda-downloads.
+
+On the other hand, when you install cudatoolkit from the main Anaconda channel, all you get is a set of 
+pre-packaged libraries (no compiler, no profiler, etc).
+
+
 Current build status
 ====================
 
