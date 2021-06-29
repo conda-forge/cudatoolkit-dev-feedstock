@@ -2,6 +2,7 @@
 {% set release = "11.0" %}
 {% set version_build = "3" %}
 {% set driver_version = "450.51.06" %}
+{% set win_driver_version = "451.82" %}
 
 package:
   name: {{ name|lower }}
@@ -11,22 +12,26 @@ source:
   path: ./
 
 build:
-  script: python build.py {{ release }} {{ version_build }} {{ driver_version }}
+  script: python build.py {{ release }} {{ version_build }} {{ driver_version }} # [linux]
+  script: python build.py {{ release }} {{ version_build }} {{ win_driver_version }} # [win]
   number: 2
-  skip: True  # [win]
   skip: True  # [osx]
 
 requirements:
   build:
     - python
-    - wget
+    - wget # [linux]
+    - curl # [win]
+    - 7zip # [win]
   run:
     - python
 
 test:
   requires:
     - numba
-    - wget
+    - wget # [linux]
+    - curl # [win]
+    - 7zip # [win]
     - {{ compiler('c') }}
 
 about:
