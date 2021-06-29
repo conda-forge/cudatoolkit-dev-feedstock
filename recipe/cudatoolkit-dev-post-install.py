@@ -93,7 +93,7 @@ class Extractor(object):
         """
         raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
-    def copy_files(self, source, destination):
+    def copy_files(self, source, destination, ignore=None):
         dest = Path(destination)
         if dest.exists() and dest.is_dir():
             shutil.rmtree(dest, ignore_errors=True)
@@ -101,7 +101,7 @@ class Extractor(object):
             dest.unlink()
         else:
             shutil.copytree(
-                source, destination, symlinks=True, ignore_dangling_symlinks=True)
+                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True)
 
 
 class LinuxExtractor(Extractor):
@@ -135,12 +135,47 @@ class LinuxExtractor(Extractor):
                 os.system('ldd --version')
                 os.system('ls -la %s' % (tmpdir))
                 raise RuntimeError(
-                    'Something went wrong in executing `{}`: directory `{}` does not exists'
+                    'Something went wrong in executing `{}`: directory `{}` does not exist'
                     .format(' '.join(cmd), toolkitpath))
 
             self.copy_files(toolkitpath, self.src_dir)
         os.remove(runfile)
 
+
+class WinExtractor(Extractor):
+    """The Windows extractor
+    """
+
+    def download(self, url, target_full_path):
+        cmd = ["curl", url, "-o", target_full_path]
+        try:
+            subprocess.check_call(cmd)
+        except subprocess.CalledProcessError as exc:
+            raise exc
+
+    def extract(self):
+        print("Extracting on Windows")
+        runfile = self.blob_dir / self.cu_blob
+        
+        with tempdir() as tmpdir:
+            cmd = [
+                "7za x,
+                str(runfile),
+                f"-o {tmpdir}"
+            ]
+            subprocess.run(cmd, env=os.environ.copy(), check=True)
+            toolkitpath = tmpdir
+
+            if not os.path.isdir(toolkitpath):
+                print('STATUS:',status)
+                os.system('dir %s' % (tmpdir))
+                raise RuntimeError(
+                    'Something went wrong in executing `{}`: directory `{}` does not exist'
+                    .format(' '.join(cmd), toolkitpath))
+
+            ignore=shutil.ignore_patterns('*.dll', '*.nvi')
+            self.copy_files(toolkitpath, self.src_dir, ignore)
+        os.remove(runfile)
 
 @contextmanager
 def _hdiutil_mount(mntpnt, image):
@@ -151,7 +186,7 @@ def _hdiutil_mount(mntpnt, image):
 
 def check_platform():
     plt = sys.platform
-    if plt.startswith("linux"):
+    if plt.startswith("linux") or plt.startswith("win"):
         return
     else:
         raise RuntimeError("Unsupported platform: %s" % (plt))
@@ -188,7 +223,10 @@ def set_config():
     cudatoolkit["installers_url_ext"] = f"local_installers/"
     cudatoolkit["patch_url_ext"] = f""
 
-    cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
+    if sys.platform.startswith("win"):
+        cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
+    else:
+        cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
 
     return cudatoolkit
 
@@ -203,7 +241,7 @@ def _main():
 
     # get an extractor
     check_platform()
-    extractor = LinuxExtractor(cudatoolkit_config)
+    extractor = WinExtractor(cudatoolkit_config) if sys.platform.startswith("win") else LinuxExtractor(cudatoolkit_config)
 
     # download binaries
     extractor.download_blobs()
