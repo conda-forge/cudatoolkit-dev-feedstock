@@ -3,6 +3,7 @@
 import argparse
 import json
 import os
+import sys
 import shutil
 import stat
 from pathlib import Path
@@ -24,7 +25,7 @@ def copy_files(src, dst):
 
 def _main(args):
 
-    prefix_dir_path = Path(os.environ["PREFIX"])
+    prefix_dir_path = Path(os.environ["LIBRARY_PREFIX"]) if sys.platform.startswith("win") else Path(os.environ["PREFIX"])
     prefix_bin_dir_path = prefix_dir_path / "bin"
     recipe_dir_path = Path(os.environ["RECIPE_DIR"])
 
