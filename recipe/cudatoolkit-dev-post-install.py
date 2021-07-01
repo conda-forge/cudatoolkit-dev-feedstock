@@ -93,15 +93,15 @@ class Extractor(object):
         """
         raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
-    def copy_files(self, source, destination, ignore=None):
+    def copy_files(self, source, destination, ignore=None, dirs_exist_ok=False):
         dest = Path(destination)
-        if dest.exists() and dest.is_dir():
+        if dest.exists() and dest.is_dir() and dirs_exist_ok==False:
             shutil.rmtree(dest, ignore_errors=True)
         elif dest.exists() and dest.is_file():
             dest.unlink()
         else:
             shutil.copytree(
-                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True)
+                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True, dirs_exist_ok=dirs_exist_ok)
 
 
 class LinuxExtractor(Extractor):
