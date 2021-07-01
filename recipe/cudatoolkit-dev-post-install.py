@@ -174,8 +174,12 @@ class WinExtractor(Extractor):
                     'Something went wrong in executing `{}`: directory `{}` does not exist'
                     .format(' '.join(cmd), toolkitpath))
 
-            ignore=shutil.ignore_patterns('*.dll', '*.nvi')
-            self.copy_files(toolkitpath, self.src_dir, ignore)
+            dst = os.path.join(self.conda_prefix, 'Library')
+            ignore=shutil.ignore_patterns('*.nvi') # '*.dll'
+            for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
+                for subdir in subdirs:
+                    if subdir in ['bin','include','lib','extras','nvvm']:
+                        self.copy_files(os.path.join(toolkitpathroot, subdir), os.path.join(dst, subdir), ignore=ignore, dirs_exist_ok=True)
         os.remove(runfile)
 
 @contextmanager
