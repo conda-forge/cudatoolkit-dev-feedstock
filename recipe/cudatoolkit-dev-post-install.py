@@ -156,13 +156,14 @@ class WinExtractor(Extractor):
     def extract(self):
         print("Extracting on Windows")
         runfile = self.blob_dir / self.cu_blob
-        
+                
         with tempdir() as tmpdir:
             cmd = [
-                "7za x,
-                str(runfile),
-                f"-o {tmpdir}"
-            ]
+                "7za",
+                "x",
+                str(runfile), 
+                f"-o{tmpdir}"
+            ] 
             subprocess.run(cmd, env=os.environ.copy(), check=True)
             toolkitpath = tmpdir
 
