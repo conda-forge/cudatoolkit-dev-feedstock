@@ -241,6 +241,12 @@ def _main():
     print("Running Post installation")
 
     os.environ['DISPLAY'] = ''
+    
+    # for script testing
+    os.environ['PREFIX'] = os.path.join(os.environ.get("CONDA_PREFIX"), 'Library')
+    os.environ["PKG_VERSION"] = '10.1.243'
+    os.environ["PKG_NAME"] = 'cudatoolkit-dev'
+    os.environ["PKG_BUILDNUM"] = '426.00'
 
     cudatoolkit_config = set_config()
 
