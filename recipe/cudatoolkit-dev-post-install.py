@@ -42,6 +42,7 @@ import urllib.parse as urlparse
 from pathlib import Path
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory as tempdir
+from distutils.dir_util import copy_tree
 
 
 class Extractor(object):
@@ -94,15 +95,15 @@ class Extractor(object):
         """
         raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
-    def copy_files(self, source, destination, ignore=None, dirs_exist_ok=False):
+    def copy_files(self, source, destination, ignore=None):
         dest = Path(destination)
-        if dest.exists() and dest.is_dir() and dirs_exist_ok==False:
+        if dest.exists() and dest.is_dir():
             shutil.rmtree(dest, ignore_errors=True)
         elif dest.exists() and dest.is_file():
             dest.unlink()
         else:
             shutil.copytree(
-                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True, dirs_exist_ok=dirs_exist_ok)
+                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True)
 
 
 class LinuxExtractor(Extractor):
@@ -178,20 +179,23 @@ class WinExtractor(Extractor):
 			# Install files directly to the library prefix. 
 			# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
 			# These options are not guaranteed at the user end
-            target_dir = os.environ["LIBRARY_PREFIX"] 
+            target_dir = os.environ["LIBRARY_PREFIX"]
+
             ignore=shutil.ignore_patterns('*.nvi') 
-            for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
-                for subdir in subdirs:
-                    if subdir in ['bin','include','lib','extras', 'libdevice']:
-                        src = os.path.join(toolkitpathroot, subdir)
-                        dst = os.path.join(target_dir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
-                        if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
-                            src = os.path.join(src, 'x64')
-                        elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
-                            src = os.path.join(src, 'win32')
-                        else:
-                            pass
-                        self.copy_files(src, dst, ignore=ignore, dirs_exist_ok=True)
+            with tempdir() as tmptargetdir:
+                for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
+                    for subdir in subdirs:
+                        if subdir in ['bin','include','lib','extras', 'libdevice']:
+                            src = os.path.join(toolkitpathroot, subdir)
+                            dst = os.path.join(tmptargetdir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
+                            if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
+                                src = os.path.join(src, 'x64')
+                            elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
+                                src = os.path.join(src, 'win32')
+                            else:
+                                pass
+                            self.copy_files(src, dst, ignore=ignore)
+                copy_tree(tmptargetdir, target_dir)
         os.remove(runfile)
 
 @contextmanager
