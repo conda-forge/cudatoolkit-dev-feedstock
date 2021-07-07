@@ -180,22 +180,20 @@ class WinExtractor(Extractor):
 			# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
 			# These options are not guaranteed at the user end
             target_dir = os.path.join(self.prefix, "Library")
-
-            ignore=shutil.ignore_patterns('*.nvi') 
-            with tempdir() as tmptargetdir:
-                for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
-                    for subdir in subdirs:
-                        if subdir in ['bin','include','lib','extras', 'libdevice']:
-                            src = os.path.join(toolkitpathroot, subdir)
-                            dst = os.path.join(tmptargetdir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
-                            if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
-                                src = os.path.join(src, 'x64')
-                            elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
-                                src = os.path.join(src, 'win32')
-                            else:
-                                pass
-                            self.copy_files(src, dst, ignore=ignore)
-                copy_tree(tmptargetdir, target_dir)
+            # ignore=shutil.ignore_patterns('*.nvi') 
+            for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
+                for subdir in subdirs:
+                    if subdir in ['bin','include','lib','extras', 'libdevice']:
+                        src = os.path.join(toolkitpathroot, subdir)
+                        dst = os.path.join(target_dir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
+                        if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
+                            src = os.path.join(src, 'x64')
+                        elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
+                            src = os.path.join(src, 'win32')
+                        else:
+                            pass
+                        # self.copy_files(src, dst, ignore=ignore)
+                        copy_tree(src, dst)
         os.remove(runfile)
 
 @contextmanager
