@@ -213,7 +213,7 @@ def set_config():
     """Set necessary configurations"""
 
     cudatoolkit = {}
-    prefix = Path(os.environ["LIBRARY_PREFIX"]) if sys.platform.startswith("win") else Path(os.environ["PREFIX"])
+    prefix = Path(os.environ["PREFIX"])
     extra_args = dict()
     with open(prefix / "bin" / "cudatoolkit-dev-extra-args.json", "r") as f:
         extra_args = json.loads(f.read())
