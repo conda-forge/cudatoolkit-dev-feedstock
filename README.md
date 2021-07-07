@@ -3,7 +3,7 @@ About cudatoolkit-dev
 
 Home: https://developer.nvidia.com
 
-Package license: [other](https://docs.nvidia.com/cuda/eula/index.html)
+Package license: [LicenseRef-NVIDIA-End-User-License-Agreement](https://docs.nvidia.com/cuda/eula/index.html)
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/cudatoolkit-dev-feedstock/blob/master/LICENSE.txt)
 
@@ -24,6 +24,18 @@ This package consists of a post-install script that downloads and
 installs the full cuda toolkit(compiler, libraries, with the exception of cuda drivers).
 
 
+Differences between this package and cudatoolkit from the main Anaconda channel
+-------------------------------------------------------------------------------
+
+When you install cudatoolkit-dev, in addition to libraries; you get the compiler (nvcc), the profiler (nvprof), etc. 
+In other words, you get the exact outcome as what you would get when installing cudatoolkit 
+by following installation steps from https://developer.nvidia.com/cuda-downloads.
+
+On the other hand, when you install cudatoolkit from the main Anaconda channel, all you get is a set of 
+pre-packaged libraries (no compiler, no profiler, etc).
+
+
+
 Current build status
 ====================
 
@@ -42,10 +54,31 @@ Current build status
         <table>
           <thead><tr><th>Variant</th><th>Status</th></tr></thead>
           <tbody><tr>
-              <td>linux_64</td>
+              <td>linux_64_python3.6.____cpython</td>
               <td>
                 <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5537&branchName=master">
-                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/cudatoolkit-dev-feedstock?branchName=master&jobName=linux&configuration=linux_64_" alt="variant">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/cudatoolkit-dev-feedstock?branchName=master&jobName=linux&configuration=linux_64_python3.6.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_64_python3.7.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5537&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/cudatoolkit-dev-feedstock?branchName=master&jobName=linux&configuration=linux_64_python3.7.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_64_python3.8.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5537&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/cudatoolkit-dev-feedstock?branchName=master&jobName=linux&configuration=linux_64_python3.8.____cpython" alt="variant">
+                </a>
+              </td>
+            </tr><tr>
+              <td>linux_64_python3.9.____cpython</td>
+              <td>
+                <a href="https://dev.azure.com/conda-forge/feedstock-builds/_build/latest?definitionId=5537&branchName=master">
+                  <img src="https://dev.azure.com/conda-forge/feedstock-builds/_apis/build/status/cudatoolkit-dev-feedstock?branchName=master&jobName=linux&configuration=linux_64_python3.9.____cpython" alt="variant">
                 </a>
               </td>
             </tr>
@@ -70,6 +103,7 @@ Installing `cudatoolkit-dev` from the `conda-forge` channel can be achieved by a
 
 ```
 conda config --add channels conda-forge
+conda config --set channel_priority strict
 ```
 
 Once the `conda-forge` channel has been enabled, `cudatoolkit-dev` can be installed with:
@@ -148,6 +182,7 @@ In order to produce a uniquely identifiable distribution:
 Feedstock Maintainers
 =====================
 
+* [@AgrawalAmey](https://github.com/AgrawalAmey/)
 * [@andersy005](https://github.com/andersy005/)
 * [@scopatz](https://github.com/scopatz/)
 * [@xmnlab](https://github.com/xmnlab/)
