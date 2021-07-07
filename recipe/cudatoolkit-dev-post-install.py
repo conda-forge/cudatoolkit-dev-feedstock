@@ -179,7 +179,7 @@ class WinExtractor(Extractor):
 			# Install files directly to the library prefix. 
 			# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
 			# These options are not guaranteed at the user end
-            target_dir = os.environ["LIBRARY_PREFIX"]
+            target_dir = Path(self.prefix) / "Library"
 
             ignore=shutil.ignore_patterns('*.nvi') 
             with tempdir() as tmptargetdir:
