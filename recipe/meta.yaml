@@ -12,26 +12,26 @@ source:
   path: ./
 
 build:
-  script: python build.py {{ release }} {{ version_build }} {{ driver_version }} # [linux]
-  script: python build.py {{ release }} {{ version_build }} {{ win_driver_version }} # [win]
+  script: python build.py {{ release }} {{ version_build }} {{ driver_version }}  # [linux]
+  script: python build.py {{ release }} {{ version_build }} {{ win_driver_version }}  # [win]
   number: 3
   skip: True  # [osx]
 
 requirements:
   build:
     - python
-    - wget # [linux]
-    - curl # [win]
-    - 7zip # [win]
+    - wget  # [linux]
+    - curl  # [win]
+    - 7zip  # [win]
   run:
     - python
 
 test:
   requires:
     - numba
-    - wget # [linux]
-    - curl # [win]
-    - 7zip # [win]
+    - wget  # [linux]
+    - curl  # [win]
+    - 7zip  # [win]
     - {{ compiler('c') }}
 
 about:
