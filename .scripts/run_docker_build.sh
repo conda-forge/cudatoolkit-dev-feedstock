@@ -69,17 +69,16 @@ DOCKER_RUN_ARGS="${CONDA_FORGE_DOCKER_RUN_ARGS}"
 if [ -z "${CI}" ]; then
     DOCKER_RUN_ARGS="-it ${DOCKER_RUN_ARGS}"
 fi
-endgroup "Configure Docker"
 
-<<<<<<< HEAD
-startgroup "Start Docker"
-=======
 ( endgroup "Configure Docker" ) 2> /dev/null
+
+( startgroup "Start Docker" ) 2> /dev/null
 
 export UPLOAD_PACKAGES="${UPLOAD_PACKAGES:-True}"
 docker run ${DOCKER_RUN_ARGS} \
            -v "${RECIPE_ROOT}":/home/conda/recipe_root:rw,z,delegated \
            -v "${FEEDSTOCK_ROOT}":/home/conda/feedstock_root:rw,z,delegated \
+           -e CONFIG \
            -e HOST_USER_ID \
            -e UPLOAD_PACKAGES \
            -e GIT_BRANCH \

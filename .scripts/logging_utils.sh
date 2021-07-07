@@ -23,6 +23,7 @@ function startgroup {
 function endgroup {
     # End a foldable group of log lines
     # Pass a single argument, quoted
+
     case ${CI:-} in
         azure )
             echo "##[endgroup]";;
