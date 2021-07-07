@@ -187,7 +187,7 @@ class WinExtractor(Extractor):
                     os.chmod(src_file, 0o777)
                     if file == "cudadevrt.lib":
                         target_bin = os.path.join(target_dir, 'bin')
-                        os.makedirs(target_bin)
+                        os.makedirs(target_bin, exist_ok=True)
                         shutil.copy2(src_file, target_bin)
                 for subdir in subdirs:
                     if subdir in ['bin','include','lib','extras', 'libdevice']:
