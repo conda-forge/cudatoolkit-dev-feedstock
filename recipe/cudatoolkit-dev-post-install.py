@@ -182,6 +182,8 @@ class WinExtractor(Extractor):
             target_dir = os.path.join(self.prefix, "Library")
             # ignore=shutil.ignore_patterns('*.nvi') 
             for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
+                for file in files:
+                    os.chmod(file, 0o777)
                 for subdir in subdirs:
                     if subdir in ['bin','include','lib','extras', 'libdevice']:
                         src = os.path.join(toolkitpathroot, subdir)
