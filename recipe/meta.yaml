@@ -2,7 +2,7 @@
 {% set release = "11.1" %}
 {% set version_build = "1" %}
 {% set driver_version = "455.32.00" %}
-{% set win_driver_version = "456.81 %}
+{% set win_driver_version = "456.81" %}
 
 package:
   name: {{ name|lower }}
