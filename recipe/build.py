@@ -3,7 +3,6 @@
 import argparse
 import json
 import os
-import sys
 import shutil
 import stat
 from pathlib import Path
@@ -25,13 +24,14 @@ def copy_files(src, dst):
 
 def _main(args):
 
-    prefix_dir_path = Path(os.environ["LIBRARY_PREFIX"]) if sys.platform.startswith("win") else Path(os.environ["PREFIX"])
+    prefix_dir_path = Path(os.environ["PREFIX"])
     prefix_bin_dir_path = prefix_dir_path / "bin"
     recipe_dir_path = Path(os.environ["RECIPE_DIR"])
 
     # Copy cudatoolkit-dev-post-install.py to $PREFIX/bin
     src = recipe_dir_path / "cudatoolkit-dev-post-install.py"
     dst = prefix_bin_dir_path
+    os.makedirs(dst, exist_ok=True)
     copy_files(src, dst)
     with open(prefix_bin_dir_path / "cudatoolkit-dev-extra-args.json", "w") as f:
         f.write(json.dumps(args))
