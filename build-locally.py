@@ -55,12 +55,7 @@ def verify_config(ns):
         print(f"selected {ns.config}")
     else:
         raise ValueError("config " + ns.config + " is not valid")
-    # Remove the following, as implemented
-    if ns.config.startswith("win"):
-        raise ValueError(
-            f"only Linux/macOS configs currently supported, got {ns.config}"
-        )
-    elif ns.config.startswith("osx") and platform.system() == "Darwin":
+    if ns.config.startswith("osx") and platform.system() == "Darwin":
         if "OSX_SDK_DIR" not in os.environ:
             raise RuntimeError(
                 "Need OSX_SDK_DIR env variable set. Run 'export OSX_SDK_DIR=/opt'"
