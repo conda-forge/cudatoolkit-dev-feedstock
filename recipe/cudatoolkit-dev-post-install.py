@@ -183,7 +183,12 @@ class WinExtractor(Extractor):
             # ignore=shutil.ignore_patterns('*.nvi') 
             for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
                 for file in files:
-                    os.chmod(os.path.join(toolkitpathroot, file), 0o777)
+                    src_file = os.path.join(toolkitpathroot, file)
+                    os.chmod(src_file, 0o777)
+                    if file == "cudadevrt.lib":
+                        target_bin = os.path.join(target_dir, 'bin')
+                        os.makedirs(target_bin)
+                        shutil.copy2(src_file, target_bin)
                 for subdir in subdirs:
                     if subdir in ['bin','include','lib','extras', 'libdevice']:
                         src = os.path.join(toolkitpathroot, subdir)
