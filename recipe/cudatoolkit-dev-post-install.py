@@ -190,7 +190,7 @@ class WinExtractor(Extractor):
                         os.makedirs(target_bin, exist_ok=True)
                         shutil.copy2(src_file, target_bin)
                 for subdir in subdirs:
-                    if subdir in ['bin','include','lib','extras', 'libdevice']:
+                    if subdir in ['bin','include','lib','extras', 'libdevice','nvvm'] and (subdir not in Path(toolkitpathroot).parts ):
                         src = os.path.join(toolkitpathroot, subdir)
                         dst = os.path.join(target_dir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
                         if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
