@@ -202,4 +202,4 @@ Feedstock Maintainers
 * [@andersy005](https://github.com/andersy005/)
 * [@scopatz](https://github.com/scopatz/)
 * [@xmnlab](https://github.com/xmnlab/)
-
+* [@kidfisch](https://github.com/kidfisch)
