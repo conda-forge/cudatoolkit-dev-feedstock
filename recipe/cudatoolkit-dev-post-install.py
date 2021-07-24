@@ -176,10 +176,11 @@ class WinExtractor(Extractor):
                     'Something went wrong in executing `{}`: directory `{}` does not exist'
                     .format(' '.join(cmd), toolkitpath))
 
-			# Install files directly to the library prefix. 
-			# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
-			# These options are not guaranteed at the user end
-            target_dir = os.path.join(self.prefix, "Library")
+			# Copy installation to pkgs folder, to be linked to conda_prefix by hardlinks.
+            # Hardlinks are selected over symlinks, because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
+			# These options are not guaranteed at the user end.
+            target_dir = self.src_dir
+            nvcc_dir = os.path.join(target_dir, "nvcc")
             # ignore=shutil.ignore_patterns('*.nvi') 
             for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
                 for file in files:
@@ -190,17 +191,20 @@ class WinExtractor(Extractor):
                         os.makedirs(target_bin, exist_ok=True)
                         shutil.copy2(src_file, target_bin)
                 for subdir in subdirs:
-                    if subdir in ['bin','include','lib','extras', 'libdevice','nvvm'] and (subdir not in Path(toolkitpathroot).parts ):
+                    if subdir in ['CUDAVisualStudioIntegration'] and (subdir not in Path(toolkitpathroot).parts ):
                         src = os.path.join(toolkitpathroot, subdir)
-                        dst = os.path.join(target_dir, 'bin') if subdir=="libdevice" else os.path.join(target_dir, subdir)
-                        if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
-                            src = os.path.join(src, 'x64')
-                        elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
-                            src = os.path.join(src, 'win32')
-                        else:
-                            pass
-                        # self.copy_files(src, dst, ignore=ignore)
+                        dst = os.path.join(target_dir, subdir)
                         copy_tree(src, dst)
+                    elif subdir in ['bin','include','lib','extras','libdevice','nvvm'] and (subdir not in Path(toolkitpathroot).parts ):
+                        src = os.path.join(toolkitpathroot, subdir)
+                        nvcc_dst = os.path.join(nvcc_dir, 'bin') if subdir=="libdevice" else os.path.join(nvcc_dir, subdir)
+                        copy_tree(src, nvcc_dst)
+                        if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
+                            libsrc = os.path.join(src, 'x64')
+                            copy_tree(libsrc, nvcc_dst)
+                        elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
+                            libsrc = os.path.join(src, 'win32')
+                            copy_tree(libsrc, nvcc_dst)
         os.remove(runfile)
 
 @contextmanager
