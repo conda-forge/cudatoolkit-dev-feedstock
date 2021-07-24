@@ -20,6 +20,7 @@ build:
 requirements:
   build:
     - python
+  host:
     - wget  # [linux]
     - curl  # [win]
     - 7zip  # [win]
