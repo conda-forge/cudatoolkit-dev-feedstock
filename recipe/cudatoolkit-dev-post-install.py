@@ -111,6 +111,14 @@ class LinuxExtractor(Extractor):
     """
 
     def extract(self):
+        # For better error messages
+        if os.path.exists("/tmp/cuda-installer.log"):
+            try:
+                os.remove("/tmp/cuda-installer.log")
+            except OSError as e:
+                raise RuntimeError(
+                    "Failed to remove /tmp/cuda-installer.log") from e
+
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
         os.chmod(runfile, 0o777)
@@ -124,6 +132,9 @@ class LinuxExtractor(Extractor):
                 "--override"
             ]
             subprocess.run(cmd, env=os.environ.copy(), check=True)
+            # Fix for conda-forge/cudatoolkit-dev-feedstock#44
+            if os.path.exists("/tmp/cuda-installer.log"):
+                os.remove("/tmp/cuda-installer.log")
             toolkitpath = tmpdir
 
             if not os.path.isdir(toolkitpath):
@@ -158,14 +169,14 @@ class WinExtractor(Extractor):
     def extract(self):
         print("Extracting on Windows")
         runfile = self.blob_dir / self.cu_blob
-                
+
         with tempdir() as tmpdir:
             cmd = [
                 "7za",
                 "x",
-                str(runfile), 
+                str(runfile),
                 f"-o{tmpdir}"
-            ] 
+            ]
             subprocess.run(cmd, env=os.environ.copy(), check=True)
             toolkitpath = tmpdir
 
@@ -176,11 +187,11 @@ class WinExtractor(Extractor):
                     'Something went wrong in executing `{}`: directory `{}` does not exist'
                     .format(' '.join(cmd), toolkitpath))
 
-			# Install files directly to the library prefix. 
-			# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
-			# These options are not guaranteed at the user end
+# Install files directly to the library prefix.
+# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
+# These options are not guaranteed at the user end
             target_dir = os.path.join(self.prefix, "Library")
-            # ignore=shutil.ignore_patterns('*.nvi') 
+            # ignore=shutil.ignore_patterns('*.nvi')
             for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
                 for file in files:
                     src_file = os.path.join(toolkitpathroot, file)
@@ -262,7 +273,7 @@ def _main():
     print("Running Post installation")
 
     os.environ['DISPLAY'] = ''
-    
+
     cudatoolkit_config = set_config()
 
     # get an extractor
