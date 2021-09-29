@@ -26,7 +26,8 @@ requirements:
     - 7zip  # [win]
   run:
     - python
-
+    - curl  # [win]
+    - 7zip  # [win]
 test:
   requires:
     - numba
