@@ -187,9 +187,9 @@ class WinExtractor(Extractor):
                     'Something went wrong in executing `{}`: directory `{}` does not exist'
                     .format(' '.join(cmd), toolkitpath))
 
-# Install files directly to the library prefix.
-# This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
-# These options are not guaranteed at the user end
+            # Install files directly to the library prefix.
+            # This is because Windows 10 requires either admin privileges or developer mode enabled (since Creators Update) for the creation of symlinks.
+            # These options are not guaranteed at the user end
             target_dir = os.path.join(self.prefix, "Library")
             # ignore=shutil.ignore_patterns('*.nvi')
             for toolkitpathroot, subdirs, files in os.walk(toolkitpath):
