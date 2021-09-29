@@ -186,10 +186,6 @@ class WinExtractor(Extractor):
                 for file in files:
                     src_file = os.path.join(toolkitpathroot, file)
                     os.chmod(src_file, 0o777)
-                    if file == "cudadevrt.lib":
-                        target_bin = os.path.join(target_dir, 'bin')
-                        os.makedirs(target_bin, exist_ok=True)
-                        shutil.copy2(src_file, target_bin)
                 for subdir in subdirs:
                     if subdir in ['CUDAVisualStudioIntegration'] and (subdir not in Path(toolkitpathroot).parts ):
                         src = os.path.join(toolkitpathroot, subdir)
@@ -197,14 +193,9 @@ class WinExtractor(Extractor):
                         copy_tree(src, dst)
                     elif subdir in ['bin','include','lib','extras','libdevice','nvvm'] and (subdir not in Path(toolkitpathroot).parts ):
                         src = os.path.join(toolkitpathroot, subdir)
-                        nvcc_dst = os.path.join(nvcc_dir, 'bin') if subdir=="libdevice" else os.path.join(nvcc_dir, subdir)
+                        nvcc_dst = os.path.join(nvcc_dir, subdir)
                         copy_tree(src, nvcc_dst)
-                        if subdir=="lib" and platform.architecture()[0]=="64bit" and os.path.exists(os.path.join(src, 'x64')):
-                            libsrc = os.path.join(src, 'x64')
-                            copy_tree(libsrc, nvcc_dst)
-                        elif subdir=="lib" and platform.architecture()[0]=="32bit" and os.path.exists(os.path.join(src, 'Win32')):
-                            libsrc = os.path.join(src, 'win32')
-                            copy_tree(libsrc, nvcc_dst)
+                        
         os.remove(runfile)
 
 @contextmanager
