@@ -111,6 +111,14 @@ class LinuxExtractor(Extractor):
     """
 
     def extract(self):
+        # For better error messages
+        if os.path.exists("/tmp/cuda-installer.log"):
+            try:
+                os.remove("/tmp/cuda-installer.log")
+            except OSError as e:
+                raise RuntimeError(
+                    "Failed to remove /tmp/cuda-installer.log") from e
+
         print("Extracting on Linux")
         runfile = self.blob_dir / self.cu_blob
         os.chmod(runfile, 0o777)
@@ -124,6 +132,9 @@ class LinuxExtractor(Extractor):
                 "--override"
             ]
             subprocess.run(cmd, env=os.environ.copy(), check=True)
+            # Fix for conda-forge/cudatoolkit-dev-feedstock#44
+            if os.path.exists("/tmp/cuda-installer.log"):
+                os.remove("/tmp/cuda-installer.log")
             toolkitpath = tmpdir
 
             if not os.path.isdir(toolkitpath):
@@ -158,14 +169,14 @@ class WinExtractor(Extractor):
     def extract(self):
         print("Extracting on Windows")
         runfile = self.blob_dir / self.cu_blob
-                
+
         with tempdir() as tmpdir:
             cmd = [
                 "7za",
                 "x",
-                str(runfile), 
+                str(runfile),
                 f"-o{tmpdir}"
-            ] 
+            ]
             subprocess.run(cmd, env=os.environ.copy(), check=True)
             toolkitpath = tmpdir
 
@@ -257,7 +268,7 @@ def _main():
     print("Running Post installation")
 
     os.environ['DISPLAY'] = ''
-    
+
     cudatoolkit_config = set_config()
 
     # get an extractor
