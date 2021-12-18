@@ -87,7 +87,7 @@ class Extractor(object):
             print("re-using previously downloaded %s" % (dl_path))
         else:
             print("downloading %s to %s" % (dl_url, dl_path))
-        self.download(dl_url, dl_path)
+            self.download(dl_url, dl_path)
 
     def extract(self, *args):
         """The method to extract files from the cuda binary blobs.
