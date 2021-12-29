@@ -208,6 +208,27 @@ class WinExtractor(Extractor):
                         copy_tree(src, nvcc_dst)
                         
         os.remove(runfile)
+        
+        # create hard links of the whole toolkit into %LIBRARY_PREFIX%
+        self.create_hardlinks_into_prefix()
+
+    def create_hardlinks_into_prefix(self):
+        src_root = os.path.join(self.src_dir, "nvcc")
+        dst_root = os.path.join(self.prefix, "Library")
+        for root, dirs, files in os.walk(src_root):
+            current_dst_root = os.path.join(dst_root, os.path.relpath(root, src_root))
+
+            for d in dirs:
+                os.makedirs(os.path.join(current_dst_root, d), exist_ok=True)
+
+            for f in files:
+                dst_file = os.path.join(current_dst_root, f)
+                src_file = os.path.join(root, f)
+
+                # if dst_file does not exist yet, create a hard link
+                if not os.path.exists(dst_file):
+                    os.link(src_file, dst_file)
+                    #print("hard link: {} --> {}".format(src_file, dst_file))
 
 @contextmanager
 def _hdiutil_mount(mntpnt, image):
