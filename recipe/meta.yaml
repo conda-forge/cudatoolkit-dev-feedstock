@@ -14,7 +14,7 @@ source:
 build:
   script: python build.py {{ release }} {{ version_build }} {{ driver_version }}  # [linux]
   script: python build.py {{ release }} {{ version_build }} {{ win_driver_version }}  # [win]
-  number: 4
+  number: 5
   skip: True  # [osx]
 
 requirements:
