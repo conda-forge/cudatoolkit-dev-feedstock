@@ -228,7 +228,6 @@ Feedstock Maintainers
 
 * [@AgrawalAmey](https://github.com/AgrawalAmey/)
 * [@andersy005](https://github.com/andersy005/)
-* [@kidfisch](https://github.com/kidfisch/)
 * [@scopatz](https://github.com/scopatz/)
 * [@xmnlab](https://github.com/xmnlab/)
 
