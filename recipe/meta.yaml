@@ -1,8 +1,8 @@
 {% set name = "cudatoolkit-dev" %}
-{% set release = "11.5" %}
+{% set release = "11.6" %}
 {% set version_build = "0" %}
-{% set driver_version = "495.29.05" %}
-{% set win_driver_version = "496.13" %}
+{% set driver_version = "510.39.01" %}
+{% set win_driver_version = "511.23" %}
 
 package:
   name: {{ name|lower }}
