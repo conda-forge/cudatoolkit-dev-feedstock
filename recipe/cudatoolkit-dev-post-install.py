@@ -277,7 +277,10 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     if sys.platform.startswith("win"):
-        cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
+        if(cudatoolkit["version"].startswith("11.6")):
+            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win.exe'
+        else:
+            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
     else:
         cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
 
