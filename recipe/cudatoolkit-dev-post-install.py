@@ -278,7 +278,7 @@ def set_config():
 
     if sys.platform.startswith("win"):
         if(cudatoolkit["version"].startswith("11.6")):
-            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win.exe'
+            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_windows.exe'
         else:
             cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
     else:
