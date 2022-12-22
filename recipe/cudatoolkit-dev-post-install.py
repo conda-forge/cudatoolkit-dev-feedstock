@@ -43,6 +43,7 @@ from pathlib import Path
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory as tempdir
 from distutils.dir_util import copy_tree
+from distutils.version import LooseVersion
 
 
 class Extractor(object):
@@ -277,7 +278,10 @@ def set_config():
     cudatoolkit["patch_url_ext"] = f""
 
     if sys.platform.startswith("win"):
-        cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
+        if LooseVersion(cudatoolkit["version"]) >= LooseVersion('11.6.0'):
+            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_windows.exe'
+        else:
+            cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_win10.exe'
     else:
         cudatoolkit["blob"] = f'cuda_{cudatoolkit["version"]}_{cudatoolkit["driver_version"]}_linux.run'
 
