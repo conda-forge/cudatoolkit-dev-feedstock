@@ -88,7 +88,7 @@ class Extractor(object):
             print("re-using previously downloaded %s" % (dl_path))
         else:
             print("downloading %s to %s" % (dl_url, dl_path))
-        self.download(dl_url, dl_path)
+            self.download(dl_url, dl_path)
 
     def extract(self, *args):
         """The method to extract files from the cuda binary blobs.
@@ -97,14 +97,17 @@ class Extractor(object):
         raise NotImplementedError("%s.extract(..)" % (type(self).__name__))
 
     def copy_files(self, source, destination, ignore=None):
+
         dest = Path(destination)
+
         if dest.exists() and dest.is_dir():
             shutil.rmtree(dest, ignore_errors=True)
-        elif dest.exists() and dest.is_file():
+
+        if dest.exists() and dest.is_file():
             dest.unlink()
-        else:
-            shutil.copytree(
-                source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True)
+
+        shutil.copytree(
+            source, destination, symlinks=True, ignore=ignore, ignore_dangling_symlinks=True)
 
 
 class LinuxExtractor(Extractor):
