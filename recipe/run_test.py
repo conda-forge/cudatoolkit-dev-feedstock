@@ -4,9 +4,9 @@ import os
 #In windows, the driver is located in $PREFIX/Library/bin/stubs
 platform = sys.platform
 if platform == "win32":
-    os.environ["NUMBA_CUDA_DRIVER"] = os.path.join(os.environ["PREFIX"], "Library", "bin", "stubs")
+    os.environ["NUMBA_CUDA_DRIVER"] = os.path.join(os.environ["PREFIX"], "Library", "bin", "stubs", "cuda.dll")
 else:
-    os.environ["NUMBA_CUDA_DRIVER"] = os.path.join(os.environ["PREFIX"], "lib", "stubs")
+    os.environ["NUMBA_CUDA_DRIVER"] = os.path.join(os.environ["PREFIX"], "lib", "stubs", "libcuda.so")
 from numba.cuda.cudadrv.libs import test
 from numba.cuda.cudadrv.nvvm import NVVM
 
