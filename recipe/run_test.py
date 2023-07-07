@@ -1,5 +1,7 @@
 import sys
 import os
+#driver located in $PREFIX/lib/stubs
+os.environ["NUMBA_CUDA_DRIVER"] = os.environ["PREFIX"] + "/lib/stubs/libcuda.so"
 from numba.cuda.cudadrv.libs import test
 from numba.cuda.cudadrv.nvvm import NVVM
 
