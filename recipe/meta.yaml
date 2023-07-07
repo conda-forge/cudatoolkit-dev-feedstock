@@ -35,7 +35,6 @@ test:
     - curl  # [win]
     - 7zip  # [win]
     - {{ compiler('c') }}
-    - cuda-driver-dev
 
 about:
   home: "https://developer.nvidia.com"
